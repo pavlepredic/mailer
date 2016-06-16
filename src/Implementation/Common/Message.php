@@ -2,14 +2,14 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
-use HelloFresh\Mailer\Contract\Attachment;
-use HelloFresh\Mailer\Contract\Equatable;
-use HelloFresh\Mailer\Contract\Header;
-use HelloFresh\Mailer\Contract\Message as MessageContract;
-use HelloFresh\Mailer\Contract\Recipient;
-use HelloFresh\Mailer\Contract\Sender;
+use HelloFresh\Mailer\Contract\AttachmentInterface;
+use HelloFresh\Mailer\Contract\EquatableInterface;
+use HelloFresh\Mailer\Contract\HeaderInterface;
+use HelloFresh\Mailer\Contract\MessageInterface;
+use HelloFresh\Mailer\Contract\RecipientInterface;
+use HelloFresh\Mailer\Contract\SenderInterface;
 
-class Message implements MessageContract
+class Message implements MessageInterface
 {
     /**
      * @var string $subject
@@ -22,22 +22,22 @@ class Message implements MessageContract
     private $content;
 
     /**
-     * @var Sender $sender
+     * @var SenderInterface $sender
      */
     private $sender;
 
     /**
-     * @var Recipient[] $recipients
+     * @var RecipientInterface[] $recipients
      */
     private $recipients;
 
     /**
-     * @var Header[] $headers
+     * @var HeaderInterface[] $headers
      */
     private $headers;
 
     /**
-     * @var Attachment[] $attachments
+     * @var AttachmentInterface[] $attachments
      */
     private $attachments;
 
@@ -122,7 +122,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function setSender(Sender $sender)
+    public function setSender(SenderInterface $sender)
     {
         $this->sender = $sender;
 
@@ -142,7 +142,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function hasRecipient(Recipient $recipient)
+    public function hasRecipient(RecipientInterface $recipient)
     {
         return $this->contains($this->getRecipients(), $recipient);
     }
@@ -150,7 +150,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function addRecipient(Recipient $recipient)
+    public function addRecipient(RecipientInterface $recipient)
     {
         if (!$this->hasRecipient($recipient)) {
             $this->recipients[] = $recipient;
@@ -162,7 +162,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function removeRecipient(Recipient $recipient)
+    public function removeRecipient(RecipientInterface $recipient)
     {
         return $this->setRecipients($this->filter($this->getRecipients(), $recipient));
     }
@@ -178,7 +178,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function hasHeader(Header $header)
+    public function hasHeader(HeaderInterface $header)
     {
         return $this->contains($this->getHeaders(), $header);
     }
@@ -186,7 +186,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function addHeader(Header $header)
+    public function addHeader(HeaderInterface $header)
     {
         if (!$this->hasHeader($header)) {
             $this->headers[] = $header;
@@ -198,7 +198,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function removeHeader(Header $header)
+    public function removeHeader(HeaderInterface $header)
     {
         $this->setHeaders($this->filter($this->getHeaders(), $header));
     }
@@ -216,7 +216,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function hasAttachment(Attachment $attachment)
+    public function hasAttachment(AttachmentInterface $attachment)
     {
         return $this->contains($this->getAttachments(), $attachment);
     }
@@ -224,7 +224,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function addAttachment(Attachment $attachment)
+    public function addAttachment(AttachmentInterface $attachment)
     {
         if (!$this->hasAttachment($attachment)) {
             $this->attachments[] = $attachment;
@@ -236,7 +236,7 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      */
-    public function removeAttachment(Attachment $attachment)
+    public function removeAttachment(AttachmentInterface $attachment)
     {
         return $this->setAttachments($this->filter($this->getAttachments(), $attachment));
     }
@@ -244,10 +244,10 @@ class Message implements MessageContract
     /**
      * Checks if $object is contained in the array of $objects
      * @param array $objects
-     * @param Equatable $object
+     * @param EquatableInterface $object
      * @return bool
      */
-    private function contains(array $objects, Equatable $object)
+    private function contains(array $objects, EquatableInterface $object)
     {
         foreach ($objects as $ownObject) {
             if ($object->equals($ownObject)) {
@@ -261,10 +261,10 @@ class Message implements MessageContract
     /**
      * Filters out $object from the array of $objects
      * @param array $objects
-     * @param Equatable $object
+     * @param EquatableInterface $object
      * @return array
      */
-    private function filter(array $objects, Equatable $object)
+    private function filter(array $objects, EquatableInterface $object)
     {
         $filtered = [];
         foreach ($objects as $ownObject) {

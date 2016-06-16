@@ -2,10 +2,10 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
-use HelloFresh\Mailer\Contract\Equatable;
-use HelloFresh\Mailer\Contract\Header as HeaderContract;
+use HelloFresh\Mailer\Contract\EquatableInterface;
+use HelloFresh\Mailer\Contract\HeaderInterface;
 
-class Header implements HeaderContract
+class Header implements HeaderInterface
 {
     /**
      * @var string $name
@@ -56,7 +56,7 @@ class Header implements HeaderContract
     /**
      * {@inheritdoc}
      */
-    public function equals(Equatable $object)
+    public function equals(EquatableInterface $object)
     {
         return
             $object instanceof self

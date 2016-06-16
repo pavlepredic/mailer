@@ -2,10 +2,10 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
-use HelloFresh\Mailer\Contract\Attachment as AttachmentContract;
-use HelloFresh\Mailer\Contract\Equatable;
+use HelloFresh\Mailer\Contract\AttachmentInterface;
+use HelloFresh\Mailer\Contract\EquatableInterface;
 
-class Attachment implements AttachmentContract
+class Attachment implements AttachmentInterface
 {
     /**
      * @var string $mimeType
@@ -79,7 +79,7 @@ class Attachment implements AttachmentContract
     /**
      * {@inheritdoc}
      */
-    public function equals(Equatable $object)
+    public function equals(EquatableInterface $object)
     {
         return
             $object instanceof self

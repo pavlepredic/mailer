@@ -2,8 +2,8 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
-use HelloFresh\Mailer\Contract\Recipient as RecipientContract;
+use HelloFresh\Mailer\Contract\RecipientInterface;
 
-class Recipient extends Participant implements RecipientContract
+class Recipient extends Participant implements RecipientInterface
 {
 }

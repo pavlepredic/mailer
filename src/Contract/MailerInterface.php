@@ -4,12 +4,13 @@ namespace HelloFresh\Mailer\Contract;
 
 use HelloFresh\Mailer\Exception\MailerException;
 
-interface Mailer
+interface MailerInterface
 {
     /**
-     * @param Message $message
+     * Sends message
+     * @param MessageInterface $message
      * @throws MailerException
      * @return void
      */
-    public function send(Message $message);
+    public function send(MessageInterface $message);
 }

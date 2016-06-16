@@ -2,8 +2,8 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
-use HelloFresh\Mailer\Contract\Sender as SenderContract;
+use HelloFresh\Mailer\Contract\SenderInterface;
 
-class Sender extends Participant implements SenderContract
+class Sender extends Participant implements SenderInterface
 {
 }

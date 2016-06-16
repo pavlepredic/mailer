@@ -2,7 +2,7 @@
 
 namespace HelloFresh\Mailer\Contract;
 
-interface Participant extends Equatable
+interface ParticipantInterface extends EquatableInterface
 {
     /**
      * @return string
@@ -16,13 +16,13 @@ interface Participant extends Equatable
 
     /**
      * @param string $email
-     * @return Participant
+     * @return ParticipantInterface
      */
     public function setEmail($email);
 
     /**
      * @param string $name
-     * @return Participant
+     * @return ParticipantInterface
      */
     public function setName($name);
 }

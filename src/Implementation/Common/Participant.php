@@ -2,9 +2,10 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
-use HelloFresh\Mailer\Contract\Participant as ParticipantContract;
+use HelloFresh\Mailer\Contract\EquatableInterface;
+use HelloFresh\Mailer\Contract\ParticipantInterface;
 
-class Participant implements ParticipantContract
+class Participant implements ParticipantInterface
 {
     /**
      * @var string $name
@@ -50,5 +51,19 @@ class Participant implements ParticipantContract
         $this->email = $email;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function equals(EquatableInterface $object)
+    {
+        return
+            $object instanceof self
+            and
+            $this->getName() === $object->getName()
+            and
+            $this->getEmail() === $object->getEmail()
+        ;
     }
 }
