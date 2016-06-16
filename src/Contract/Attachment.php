@@ -2,7 +2,7 @@
 
 namespace HelloFresh\Mailer\Contract;
 
-interface Attachment
+interface Attachment extends Equatable
 {
     /**
      * @return string
@@ -22,19 +22,19 @@ interface Attachment
 
     /**
      * @param string $mimeType
-     * @return void
+     * @return Attachment
      */
     public function setMimeType($mimeType);
 
     /**
      * @param string $name
-     * @return void
+     * @return Attachment
      */
     public function setName($name);
 
     /**
      * @param string $content - a base64-encoded string
-     * @return void
+     * @return Attachment
      */
     public function setContent($content);
 }
