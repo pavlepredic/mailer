@@ -1,0 +1,17 @@
+{
+    "name": "hellofresh/mailer",
+    "description": "Event-based mailing system",
+    "require": {
+        "mandrill/mandrill": "~1.0",
+        "hellofresh/reagieren": "~0.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "HelloFresh\\Mailer\\": "src",
+            "Tests\\": "tests"
+        }
+    }
+}
