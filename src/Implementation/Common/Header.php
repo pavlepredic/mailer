@@ -66,4 +66,27 @@ class Header implements HeaderInterface
             $this->getValue() === $object->getValue()
         ;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toArray()
+    {
+        return [
+            $this->getName(),
+            $this->getValue(),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function fromArray(array $array)
+    {
+        //TODO validate array
+        $header = new static;
+        $header->setName($array[0]);
+        $header->setValue($array[1]);
+        return $header;
+    }
 }

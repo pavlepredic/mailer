@@ -2,98 +2,74 @@
 
 namespace Tests\Implementation\Common;
 
-use HelloFresh\Mailer\Implementation\Common\Attachment;
-use HelloFresh\Mailer\Implementation\Common\Header;
 use HelloFresh\Mailer\Implementation\Common\Message;
-use HelloFresh\Mailer\Implementation\Common\Recipient;
 
 class MessageTest extends \PHPUnit_Framework_TestCase
 {
     public function testAddRemoveHeader()
     {
-        $header1 = $this->createHeader('name1', 'value1');
-        $header2 = $this->createHeader('name2', 'value2');
-
         $message = new Message();
-        $message->addHeader($header1);
-        $message->addHeader($header2);
+        $message->addHeader(Factory::createHeader('name1', 'value1'));
+        $message->addHeader(Factory::createHeader('name2', 'value2'));
 
-        $this->assertTrue($message->hasHeader($header1));
-        $this->assertTrue($message->hasHeader($header2));
+        $this->assertTrue($message->hasHeader(Factory::createHeader('name1', 'value1')));
+        $this->assertTrue($message->hasHeader(Factory::createHeader('name2', 'value2')));
 
-        $message->removeHeader($header1);
-        $this->assertFalse($message->hasHeader($header1));
-        $this->assertTrue($message->hasHeader($header2));
+        $message->removeHeader(Factory::createHeader('name1', 'value1'));
+        $this->assertFalse($message->hasHeader(Factory::createHeader('name1', 'value1')));
+        $this->assertTrue($message->hasHeader(Factory::createHeader('name2', 'value2')));
 
-        $message->removeHeader($header2);
-        $this->assertFalse($message->hasHeader($header1));
-        $this->assertFalse($message->hasHeader($header2));
+        $message->removeHeader(Factory::createHeader('name2', 'value2'));
+        $this->assertFalse($message->hasHeader(Factory::createHeader('name1', 'value1')));
+        $this->assertFalse($message->hasHeader(Factory::createHeader('name2', 'value2')));
     }
 
     public function testAddRemoveAttachment()
     {
-        $attachment1 = $this->createAttachment('mime1', 'name1', 'content1');
-        $attachment2 = $this->createAttachment('mime2', 'name2', 'content2');
-
         $message = new Message();
-        $message->addAttachment($attachment1);
-        $message->addAttachment($attachment2);
+        $message->addAttachment(Factory::createAttachment('mime1', 'name1', 'content1'));
+        $message->addAttachment(Factory::createAttachment('mime2', 'name2', 'content2'));
 
-        $this->assertTrue($message->hasAttachment($attachment1));
-        $this->assertTrue($message->hasAttachment($attachment2));
+        $this->assertTrue($message->hasAttachment(Factory::createAttachment('mime1', 'name1', 'content1')));
+        $this->assertTrue($message->hasAttachment(Factory::createAttachment('mime2', 'name2', 'content2')));
 
-        $message->removeAttachment($attachment1);
-        $this->assertFalse($message->hasAttachment($attachment1));
-        $this->assertTrue($message->hasAttachment($attachment2));
+        $message->removeAttachment(Factory::createAttachment('mime1', 'name1', 'content1'));
+        $this->assertFalse($message->hasAttachment(Factory::createAttachment('mime1', 'name1', 'content1')));
+        $this->assertTrue($message->hasAttachment(Factory::createAttachment('mime2', 'name2', 'content2')));
 
-        $message->removeAttachment($attachment2);
-        $this->assertFalse($message->hasAttachment($attachment1));
-        $this->assertFalse($message->hasAttachment($attachment2));
+        $message->removeAttachment(Factory::createAttachment('mime2', 'name2', 'content2'));
+        $this->assertFalse($message->hasAttachment(Factory::createAttachment('mime1', 'name1', 'content1')));
+        $this->assertFalse($message->hasAttachment(Factory::createAttachment('mime2', 'name2', 'content2')));
     }
 
     public function testAddRemoveRecipient()
     {
-        $recipient1 = $this->createRecipient('name1', 'email1');
-        $recipient2 = $this->createRecipient('name2', 'email2');
-
         $message = new Message();
-        $message->addRecipient($recipient1);
-        $message->addRecipient($recipient2);
+        $message->addRecipient(Factory::createRecipient('name1', 'email1'));
+        $message->addRecipient(Factory::createRecipient('name2', 'email2'));
 
-        $this->assertTrue($message->hasRecipient($recipient1));
-        $this->assertTrue($message->hasRecipient($recipient2));
+        $this->assertTrue($message->hasRecipient(Factory::createRecipient('name1', 'email1')));
+        $this->assertTrue($message->hasRecipient(Factory::createRecipient('name2', 'email2')));
 
-        $message->removeRecipient($recipient1);
-        $this->assertFalse($message->hasRecipient($recipient1));
-        $this->assertTrue($message->hasRecipient($recipient2));
+        $message->removeRecipient(Factory::createRecipient('name1', 'email1'));
+        $this->assertFalse($message->hasRecipient(Factory::createRecipient('name1', 'email1')));
+        $this->assertTrue($message->hasRecipient(Factory::createRecipient('name2', 'email2')));
 
-        $message->removeRecipient($recipient2);
-        $this->assertFalse($message->hasRecipient($recipient1));
-        $this->assertFalse($message->hasRecipient($recipient2));
+        $message->removeRecipient(Factory::createRecipient('name2', 'email2'));
+        $this->assertFalse($message->hasRecipient(Factory::createRecipient('name1', 'email1')));
+        $this->assertFalse($message->hasRecipient(Factory::createRecipient('name2', 'email2')));
     }
 
-    private function createHeader($name, $value)
+    public function testToAndFromArray()
     {
-        $header = new Header();
-        $header->setName($name);
-        $header->setValue($value);
-        return $header;
-    }
+        $original = Factory::createMessage();
 
-    private function createAttachment($mimeType, $name, $content)
-    {
-        $attachment = new Attachment();
-        $attachment->setMimeType($mimeType);
-        $attachment->setName($name);
-        $attachment->setContent($content);
-        return $attachment;
-    }
+        $array = $original->toArray();
 
-    private function createRecipient($name, $email)
-    {
-        $recipient = new Recipient();
-        $recipient->setName($name);
-        $recipient->setEmail($email);
-        return $recipient;
+        /** @var Message $clone */
+        $clone = Message::fromArray($array);
+
+        $this->assertTrue($clone instanceof Message);
+        $this->assertTrue($original->equals($clone));
     }
 }

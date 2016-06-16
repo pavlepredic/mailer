@@ -91,4 +91,29 @@ class Attachment implements AttachmentInterface
             $this->getContent() === $object->getContent()
         ;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toArray()
+    {
+        return [
+            $this->getMimeType(),
+            $this->getName(),
+            $this->getContent(),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function fromArray(array $array)
+    {
+        //TODO validate array
+        $attachment = new static;
+        $attachment->setMimeType($array[0]);
+        $attachment->setName($array[1]);
+        $attachment->setContent($array[2]);
+        return $attachment;
+    }
 }

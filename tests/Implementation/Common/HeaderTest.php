@@ -14,7 +14,9 @@ class HeaderTest extends \PHPUnit_Framework_TestCase
      */
     public function testEquality(array $first, array $second, $expected)
     {
-        $this->assertEquals($expected, $this->loadHeader($first)->equals($this->loadHeader($second)));
+        $firstHeader = Factory::createHeader($first[0], $first[1]);
+        $secondHeader = Factory::createHeader($second[0], $second[1]);
+        $this->assertEquals($expected, $firstHeader->equals($secondHeader));
     }
 
     public function headerProvider()
@@ -26,11 +28,15 @@ class HeaderTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    private function loadHeader(array $data)
+    public function testToAndFromArray()
     {
-        $header = new Header();
-        $header->setName($data[0]);
-        $header->setValue($data[1]);
-        return $header;
+        $original = Factory::createHeader();
+        $array = $original->toArray();
+
+        /** @var Header $clone */
+        $clone = Header::fromArray($array);
+
+        $this->assertTrue($clone instanceof Header);
+        $this->assertTrue($clone->equals($original));
     }
 }

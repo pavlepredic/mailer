@@ -2,7 +2,9 @@
 
 namespace HelloFresh\Mailer\Contract;
 
-interface MessageInterface
+use Doctrine\Common\Collections\Collection;
+
+interface MessageInterface extends EquatableInterface, ArrayableInterface
 {
     /**
      * @return string
@@ -47,6 +49,11 @@ interface MessageInterface
     public function getAttachments();
 
     /**
+     * @return PriorityInterface
+     */
+    public function getPriority();
+
+    /**
      * @param AttachmentInterface $attachment
      * @return boolean
      */
@@ -71,12 +78,6 @@ interface MessageInterface
     public function setSender(SenderInterface $sender);
 
     /**
-     * @param RecipientInterface[] $recipients
-     * @return MessageInterface
-     */
-    public function setRecipients(array $recipients);
-
-    /**
      * @param RecipientInterface $recipient
      * @return MessageInterface
      */
@@ -87,12 +88,6 @@ interface MessageInterface
      * @return MessageInterface
      */
     public function removeRecipient(RecipientInterface $recipient);
-
-    /**
-     * @param HeaderInterface[] $headers
-     * @return MessageInterface
-     */
-    public function setHeaders(array $headers);
 
     /**
      * @param HeaderInterface $header
@@ -107,12 +102,6 @@ interface MessageInterface
     public function removeHeader(HeaderInterface $header);
 
     /**
-     * @param AttachmentInterface[] $attachments
-     * @return MessageInterface
-     */
-    public function setAttachments(array $attachments);
-
-    /**
      * @param AttachmentInterface $attachment
      * @return MessageInterface
      */
@@ -123,4 +112,10 @@ interface MessageInterface
      * @return MessageInterface
      */
     public function removeAttachment(AttachmentInterface $attachment);
+
+    /**
+     * @param PriorityInterface $priority
+     * @return MessageInterface
+     */
+    public function setPriority(PriorityInterface $priority);
 }

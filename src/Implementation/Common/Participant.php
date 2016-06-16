@@ -2,6 +2,7 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
+use HelloFresh\Mailer\Contract\ArrayableInterface;
 use HelloFresh\Mailer\Contract\EquatableInterface;
 use HelloFresh\Mailer\Contract\ParticipantInterface;
 
@@ -65,5 +66,28 @@ class Participant implements ParticipantInterface
             and
             $this->getEmail() === $object->getEmail()
         ;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toArray()
+    {
+        return [
+            $this->getName(),
+            $this->getEmail(),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function fromArray(array $array)
+    {
+        //TODO validate array
+        $participant = new static;
+        $participant->setName($array[0]);
+        $participant->setEmail($array[1]);
+        return $participant;
     }
 }

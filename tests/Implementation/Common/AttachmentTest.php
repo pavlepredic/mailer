@@ -14,7 +14,9 @@ class AttachmentTest extends \PHPUnit_Framework_TestCase
      */
     public function testEquality(array $first, array $second, $expected)
     {
-        $this->assertEquals($expected, $this->loadAttachment($first)->equals($this->loadAttachment($second)));
+        $firstAttachment = Factory::createAttachment($first[0], $first[1], $first[2]);
+        $secondAttachment = Factory::createAttachment($second[0], $second[1], $second[2]);
+        $this->assertEquals($expected, $firstAttachment->equals($secondAttachment));
     }
 
     public function attachmentProvider()
@@ -27,12 +29,15 @@ class AttachmentTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    private function loadAttachment(array $data)
+    public function testToAndFromArray()
     {
-        $attachment = new Attachment();
-        $attachment->setMimeType($data[0]);
-        $attachment->setName($data[1]);
-        $attachment->setContent($data[2]);
-        return $attachment;
+        $original = Factory::createAttachment('mime', 'name', 'content');
+        $array = $original->toArray();
+
+        /** @var Attachment $clone */
+        $clone = Attachment::fromArray($array);
+
+        $this->assertTrue($clone instanceof Attachment);
+        $this->assertTrue($clone->equals($original));
     }
 }

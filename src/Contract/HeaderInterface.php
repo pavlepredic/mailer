@@ -2,7 +2,7 @@
 
 namespace HelloFresh\Mailer\Contract;
 
-interface HeaderInterface extends EquatableInterface
+interface HeaderInterface extends EquatableInterface, ArrayableInterface
 {
     /**
      * @return string
