@@ -2,19 +2,6 @@
 
 namespace HelloFresh\Mailer\Contract;
 
-use HelloFresh\Mailer\Exception\InvalidArgumentException;
-
-interface PriorityInterface extends EquatableInterface
+interface PriorityInterface extends StringableInterface
 {
-    /**
-     * @return string
-     */
-    public function toString();
-
-    /**
-     * @param $string
-     * @return PriorityInterface
-     * @throws InvalidArgumentException
-     */
-    public static function fromString($string);
 }

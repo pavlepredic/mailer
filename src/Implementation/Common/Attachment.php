@@ -3,7 +3,6 @@
 namespace HelloFresh\Mailer\Implementation\Common;
 
 use HelloFresh\Mailer\Contract\AttachmentInterface;
-use HelloFresh\Mailer\Contract\EquatableInterface;
 
 class Attachment implements AttachmentInterface
 {
@@ -74,22 +73,6 @@ class Attachment implements AttachmentInterface
         $this->content = $content;
 
         return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(EquatableInterface $object)
-    {
-        return
-            $object instanceof self
-            and
-            $this->getMimeType() === $object->getMimeType()
-            and
-            $this->getName() === $object->getName()
-            and
-            $this->getContent() === $object->getContent()
-        ;
     }
 
     /**

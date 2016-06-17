@@ -2,7 +2,6 @@
 
 namespace HelloFresh\Mailer\Implementation\Common\Priority;
 
-use HelloFresh\Mailer\Contract\EquatableInterface;
 use HelloFresh\Mailer\Contract\PriorityInterface;
 use HelloFresh\Mailer\Exception\InvalidArgumentException;
 
@@ -31,17 +30,5 @@ abstract class Priority implements PriorityInterface
         }
 
         return new $class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(EquatableInterface $object)
-    {
-        return
-            $object instanceof self
-            and
-            $this->toString() === $object->toString()
-        ;
     }
 }

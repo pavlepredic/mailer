@@ -2,62 +2,12 @@
 
 namespace HelloFresh\Mailer\Contract;
 
-use Doctrine\Common\Collections\Collection;
-
-interface MessageInterface extends EquatableInterface, ArrayableInterface
+interface MessageInterface extends ArrayableInterface
 {
     /**
      * @return string
      */
     public function getSubject();
-
-    /**
-     * @return string
-     */
-    public function getContent();
-
-    /**
-     * @return SenderInterface
-     */
-    public function getSender();
-
-    /**
-     * @return RecipientInterface[]
-     */
-    public function getRecipients();
-
-    /**
-     * @param RecipientInterface $recipient
-     * @return boolean
-     */
-    public function hasRecipient(RecipientInterface $recipient);
-
-    /**
-     * @return HeaderInterface[]
-     */
-    public function getHeaders();
-
-    /**
-     * @param HeaderInterface $header
-     * @return boolean
-     */
-    public function hasHeader(HeaderInterface $header);
-
-    /**
-     * @return AttachmentInterface[]
-     */
-    public function getAttachments();
-
-    /**
-     * @return PriorityInterface
-     */
-    public function getPriority();
-
-    /**
-     * @param AttachmentInterface $attachment
-     * @return boolean
-     */
-    public function hasAttachment(AttachmentInterface $attachment);
 
     /**
      * @param string $subject
@@ -66,10 +16,20 @@ interface MessageInterface extends EquatableInterface, ArrayableInterface
     public function setSubject($subject);
 
     /**
+     * @return string
+     */
+    public function getContent();
+
+    /**
      * @param string $content
      * @return MessageInterface
      */
     public function setContent($content);
+
+    /**
+     * @return SenderInterface
+     */
+    public function getSender();
 
     /**
      * @param SenderInterface $sender
@@ -78,16 +38,20 @@ interface MessageInterface extends EquatableInterface, ArrayableInterface
     public function setSender(SenderInterface $sender);
 
     /**
+     * @return RecipientInterface[]
+     */
+    public function getRecipients();
+
+    /**
      * @param RecipientInterface $recipient
      * @return MessageInterface
      */
     public function addRecipient(RecipientInterface $recipient);
 
     /**
-     * @param RecipientInterface $recipient
-     * @return MessageInterface
+     * @return HeaderInterface[]
      */
-    public function removeRecipient(RecipientInterface $recipient);
+    public function getHeaders();
 
     /**
      * @param HeaderInterface $header
@@ -96,10 +60,9 @@ interface MessageInterface extends EquatableInterface, ArrayableInterface
     public function addHeader(HeaderInterface $header);
 
     /**
-     * @param HeaderInterface $header
-     * @return MessageInterface
+     * @return AttachmentInterface[]
      */
-    public function removeHeader(HeaderInterface $header);
+    public function getAttachments();
 
     /**
      * @param AttachmentInterface $attachment
@@ -108,10 +71,9 @@ interface MessageInterface extends EquatableInterface, ArrayableInterface
     public function addAttachment(AttachmentInterface $attachment);
 
     /**
-     * @param AttachmentInterface $attachment
-     * @return MessageInterface
+     * @return PriorityInterface
      */
-    public function removeAttachment(AttachmentInterface $attachment);
+    public function getPriority();
 
     /**
      * @param PriorityInterface $priority

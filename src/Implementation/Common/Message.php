@@ -2,8 +2,8 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use HelloFresh\Mailer\Contract\AttachmentInterface;
-use HelloFresh\Mailer\Contract\EquatableInterface;
 use HelloFresh\Mailer\Contract\HeaderInterface;
 use HelloFresh\Mailer\Contract\MessageInterface;
 use HelloFresh\Mailer\Contract\PriorityInterface;
@@ -55,9 +55,9 @@ class Message implements MessageInterface
      */
     public function __construct(PriorityInterface $priority = null)
     {
-        $this->recipients = new Collection();
-        $this->headers = new Collection();
-        $this->attachments = new Collection();
+        $this->recipients = new ArrayCollection();
+        $this->headers = new ArrayCollection();
+        $this->attachments = new ArrayCollection();
         if (!$priority) {
             $priority = new NormalPriority();
         }
@@ -76,51 +76,19 @@ class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
-    public function getContent()
-    {
-        return $this->content;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getSender()
-    {
-        return $this->sender;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getRecipients()
-    {
-        return $this->recipients;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getHeaders()
-    {
-        return $this->headers;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAttachments()
-    {
-        return $this->attachments;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function setSubject($subject)
     {
         $this->subject = $subject;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getContent()
+    {
+        return $this->content;
     }
 
     /**
@@ -136,6 +104,14 @@ class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    public function getSender()
+    {
+        return $this->sender;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function setSender(SenderInterface $sender)
     {
         $this->sender = $sender;
@@ -146,9 +122,9 @@ class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
-    public function hasRecipient(RecipientInterface $recipient)
+    public function getRecipients()
     {
-        return $this->getRecipients()->contains($recipient);
+        return $this->recipients;
     }
 
     /**
@@ -156,9 +132,7 @@ class Message implements MessageInterface
      */
     public function addRecipient(RecipientInterface $recipient)
     {
-        if (!$this->hasRecipient($recipient)) {
-            $this->getRecipients()->add($recipient);
-        }
+        $this->getRecipients()->add($recipient);
 
         return $this;
     }
@@ -166,17 +140,9 @@ class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
-    public function removeRecipient(RecipientInterface $recipient)
+    public function getHeaders()
     {
-        return $this->getRecipients()->removeElement($recipient);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasHeader(HeaderInterface $header)
-    {
-        return $this->getHeaders()->contains($header);
+        return $this->headers;
     }
 
     /**
@@ -184,9 +150,7 @@ class Message implements MessageInterface
      */
     public function addHeader(HeaderInterface $header)
     {
-        if (!$this->hasHeader($header)) {
-            $this->getHeaders()->add($header);
-        }
+        $this->getHeaders()->add($header);
 
         return $this;
     }
@@ -194,17 +158,9 @@ class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
-    public function removeHeader(HeaderInterface $header)
+    public function getAttachments()
     {
-        $this->getHeaders()->removeElement($header);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasAttachment(AttachmentInterface $attachment)
-    {
-        return $this->getAttachments()->contains($attachment);
+        return $this->attachments;
     }
 
     /**
@@ -212,19 +168,9 @@ class Message implements MessageInterface
      */
     public function addAttachment(AttachmentInterface $attachment)
     {
-        if (!$this->hasAttachment($attachment)) {
-            $this->getAttachments()->add($attachment);
-        }
+        $this->getAttachments()->add($attachment);
 
         return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function removeAttachment(AttachmentInterface $attachment)
-    {
-        return $this->getAttachments()->removeElement($attachment);
     }
 
     /**
@@ -298,29 +244,5 @@ class Message implements MessageInterface
         $message->setPriority(Priority::fromString($array[6]));
 
         return $message;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(EquatableInterface $object)
-    {
-        return
-            $object instanceof self
-            and
-            $this->getSubject() === $object->getSubject()
-            and
-            $this->getContent() === $object->getContent()
-            and
-            $this->getSender()->equals($object->getSender())
-            and
-            $this->getRecipients()->equals($object->getRecipients())
-            and
-            $this->getHeaders()->equals($object->getHeaders())
-            and
-            $this->getAttachments()->equals($object->getAttachments())
-            and
-            $this->getPriority()->equals($object->getPriority())
-        ;
     }
 }

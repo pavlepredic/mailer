@@ -5,7 +5,6 @@ namespace Tests\Implementation\Common;
 use HelloFresh\Mailer\Implementation\Common\Attachment;
 use HelloFresh\Mailer\Implementation\Common\Header;
 use HelloFresh\Mailer\Implementation\Common\Message;
-use HelloFresh\Mailer\Implementation\Common\Priority\HighPriority;
 use HelloFresh\Mailer\Implementation\Common\Priority\Priority;
 use HelloFresh\Mailer\Implementation\Common\Recipient;
 use HelloFresh\Mailer\Implementation\Common\Sender;

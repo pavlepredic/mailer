@@ -2,7 +2,6 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
-use HelloFresh\Mailer\Contract\EquatableInterface;
 use HelloFresh\Mailer\Contract\HeaderInterface;
 
 class Header implements HeaderInterface
@@ -51,20 +50,6 @@ class Header implements HeaderInterface
         $this->value = $value;
 
         return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(EquatableInterface $object)
-    {
-        return
-            $object instanceof self
-            and
-            $this->getName() === $object->getName()
-            and
-            $this->getValue() === $object->getValue()
-        ;
     }
 
     /**

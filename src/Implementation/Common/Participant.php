@@ -2,8 +2,6 @@
 
 namespace HelloFresh\Mailer\Implementation\Common;
 
-use HelloFresh\Mailer\Contract\ArrayableInterface;
-use HelloFresh\Mailer\Contract\EquatableInterface;
 use HelloFresh\Mailer\Contract\ParticipantInterface;
 
 class Participant implements ParticipantInterface
@@ -52,20 +50,6 @@ class Participant implements ParticipantInterface
         $this->email = $email;
 
         return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(EquatableInterface $object)
-    {
-        return
-            $object instanceof self
-            and
-            $this->getName() === $object->getName()
-            and
-            $this->getEmail() === $object->getEmail()
-        ;
     }
 
     /**

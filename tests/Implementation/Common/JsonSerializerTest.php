@@ -17,6 +17,6 @@ class JsonSerializerTest extends \PHPUnit_Framework_TestCase
         /** @var MessageInterface $unserialized */
         $unserialized = $serializer->unserialize($serialized);
         $this->assertTrue($unserialized instanceof MessageInterface);
-        $this->assertTrue($message->equals($unserialized));
+        $this->assertEquals($message, $unserialized);
     }
 }
