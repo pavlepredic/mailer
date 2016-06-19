@@ -44,16 +44,14 @@ class MessageDecorator
      */
     protected function getRecipients()
     {
-        $recipients = [];
-        foreach ($this->getMessage()->getRecipients() as $recipient) {
-            $recipients[] = [
-                'email' => $recipient->getEmail(),
-                'name' => $recipient->getName(),
-                'type' => $recipient->getType(),
-            ];
-        }
-
-        return $recipients;
+        $recipient = $this->getMessage()->getRecipient();
+        return [
+            [
+            'email' => $recipient->getEmail(),
+            'name' => $recipient->getName(),
+            'type' => $recipient->getType(),
+            ]
+        ];
     }
 
     /**
@@ -101,5 +99,20 @@ class MessageDecorator
             'headers' => $this->getHeaders(),
             'attachments' => $this->getAttachments(),
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getMergeVariables()
+    {
+        $variables = [];
+        foreach ($this->message->getVariables() as $variable) {
+            $variables[] = [
+                'name' => $variable->getName(),
+                'content' => $variable->getValue(),
+            ];
+        }
+        return $variables;
     }
 }

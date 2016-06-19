@@ -29,15 +29,4 @@ interface RecipientInterface extends ParticipantInterface
      * @throws InvalidArgumentException
      */
     public function setType($type);
-
-    /**
-     * @return StatusInterface
-     */
-    public function getStatus();
-
-    /**
-     * @param StatusInterface $status
-     * @return RecipientInterface
-     */
-    public function setStatus(StatusInterface $status);
 }

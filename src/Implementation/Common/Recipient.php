@@ -3,9 +3,7 @@
 namespace HelloFresh\Mailer\Implementation\Common;
 
 use HelloFresh\Mailer\Contract\RecipientInterface;
-use HelloFresh\Mailer\Contract\StatusInterface;
 use HelloFresh\Mailer\Exception\InvalidArgumentException;
-use HelloFresh\Mailer\Implementation\Common\Status\Pending;
 
 class Recipient extends Participant implements RecipientInterface
 {
@@ -15,26 +13,15 @@ class Recipient extends Participant implements RecipientInterface
     private $type;
 
     /**
-     * @var StatusInterface $status
-     */
-    private $status;
-
-    /**
      * Recipient constructor.
      * @param string $type
-     * @param StatusInterface $status
      */
-    public function __construct($type = null, StatusInterface $status = null)
+    public function __construct($type = null)
     {
         if (!$type) {
             $type = self::TYPE_TO;
         }
-
-        if (!$status) {
-            $status = new Pending();
-        }
         $this->setType($type);
-        $this->setStatus($status);
     }
 
     /**
@@ -55,24 +42,6 @@ class Recipient extends Participant implements RecipientInterface
         }
 
         $this->type = $type;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setStatus(StatusInterface $status)
-    {
-        $this->status = $status;
 
         return $this;
     }

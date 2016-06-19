@@ -2,6 +2,8 @@
 
 namespace HelloFresh\Mailer\Contract;
 
+use HelloFresh\Mailer\Implementation\Common\Variable;
+
 interface MessageInterface extends ArrayableInterface
 {
     /**
@@ -11,9 +13,36 @@ interface MessageInterface extends ArrayableInterface
 
     /**
      * @param string $subject
-     * @return void
+     * @return MessageInterface
      */
     public function setSubject($subject);
+
+    /**
+     * @return string
+     */
+    public function getTemplate();
+
+    /**
+     * @param string $template
+     * @return MessageInterface
+     */
+    public function setTemplate($template);
+
+    /**
+     * @return Variable[]
+     */
+    public function getVariables();
+
+    /**
+     * @param Variable $variable
+     * @return MessageInterface
+     */
+    public function addVariable(Variable $variable);
+
+    /**
+     * @return MessageInterface
+     */
+    public function clearVariables();
 
     /**
      * @return string
@@ -49,21 +78,17 @@ interface MessageInterface extends ArrayableInterface
     public function setSender(SenderInterface $sender);
 
     /**
-     * @return RecipientInterface[]
-     */
-    public function getRecipients();
-
-    /**
-     * @param string $email
+     * To simplify error handling, first release
+     * will support only one recipient per message
      * @return RecipientInterface
      */
-    public function getRecipientByEmail($email);
+    public function getRecipient();
 
     /**
      * @param RecipientInterface $recipient
      * @return MessageInterface
      */
-    public function addRecipient(RecipientInterface $recipient);
+    public function setRecipient(RecipientInterface $recipient);
 
     /**
      * @return HeaderInterface[]
@@ -77,6 +102,11 @@ interface MessageInterface extends ArrayableInterface
     public function addHeader(HeaderInterface $header);
 
     /**
+     * @return MessageInterface
+     */
+    public function clearHeaders();
+
+    /**
      * @return AttachmentInterface[]
      */
     public function getAttachments();
@@ -86,6 +116,11 @@ interface MessageInterface extends ArrayableInterface
      * @return MessageInterface
      */
     public function addAttachment(AttachmentInterface $attachment);
+
+    /**
+     * @return MessageInterface
+     */
+    public function clearAttachments();
 
     /**
      * @return PriorityInterface

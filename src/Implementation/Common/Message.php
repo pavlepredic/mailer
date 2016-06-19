@@ -20,6 +20,16 @@ class Message implements MessageInterface
     private $subject;
 
     /**
+     * @var string $template
+     */
+    private $template;
+
+    /**
+     * @var array $variables
+     */
+    private $variables;
+
+    /**
      * @var string $htmlContent
      */
     private $htmlContent;
@@ -35,9 +45,9 @@ class Message implements MessageInterface
     private $sender;
 
     /**
-     * @var RecipientInterface[] $recipients
+     * @var RecipientInterface $recipient
      */
-    private $recipients;
+    private $recipient;
 
     /**
      * @var HeaderInterface[] $headers
@@ -60,9 +70,9 @@ class Message implements MessageInterface
      */
     public function __construct(PriorityInterface $priority = null)
     {
-        $this->recipients = new ArrayCollection();
         $this->headers = new ArrayCollection();
         $this->attachments = new ArrayCollection();
+        $this->variables = new ArrayCollection();
         if (!$priority) {
             $priority = new NormalPriority();
         }
@@ -84,6 +94,51 @@ class Message implements MessageInterface
     public function setSubject($subject)
     {
         $this->subject = $subject;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getTemplate()
+    {
+        return $this->template;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setTemplate($template)
+    {
+        $this->template = $template;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getVariables()
+    {
+        return $this->variables;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addVariable(Variable $variable)
+    {
+        $this->getVariables()->add($variable);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearVariables()
+    {
+        $this->variables->clear();
 
         return $this;
     }
@@ -145,31 +200,19 @@ class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
-    public function getRecipients()
+    public function getRecipient()
     {
-        return $this->recipients;
+        return $this->recipient;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function addRecipient(RecipientInterface $recipient)
+    public function setRecipient(RecipientInterface $recipient)
     {
-        $this->getRecipients()->add($recipient);
+        $this->recipient = $recipient;
 
         return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getRecipientByEmail($email)
-    {
-        foreach ($this->getRecipients() as $recipient) {
-            if ($recipient->getEmail() === $email) {
-                return $recipient;
-            }
-        }
     }
 
     /**
@@ -193,6 +236,16 @@ class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    public function clearHeaders()
+    {
+        $this->headers->clear();
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getAttachments()
     {
         return $this->attachments;
@@ -204,6 +257,16 @@ class Message implements MessageInterface
     public function addAttachment(AttachmentInterface $attachment)
     {
         $this->getAttachments()->add($attachment);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearAttachments()
+    {
+        $this->attachments->clear();
 
         return $this;
     }
@@ -231,9 +294,9 @@ class Message implements MessageInterface
      */
     public function toArray()
     {
-        $recipients = [];
-        foreach ($this->getRecipients() as $recipient) {
-            $recipients[] = $recipient->toArray();
+        $variables = [];
+        foreach ($this->getVariables() as $variable) {
+            $variables[] = $variable->toArray();
         }
 
         $headers = [];
@@ -248,12 +311,14 @@ class Message implements MessageInterface
 
         return [
             $this->getSubject(),
+            $this->getTemplate(),
             $this->getHtmlContent(),
             $this->getPlainTextContent(),
             $this->getSender()->toArray(),
-            $recipients,
+            $this->getRecipient()->toArray(),
             $headers,
             $attachments,
+            $variables,
             $this->getPriority()->toString(),
         ];
     }
@@ -266,19 +331,22 @@ class Message implements MessageInterface
         //TODO validate array
         $message = new static;
         $message->setSubject($array[0]);
-        $message->setHtmlContent($array[1]);
-        $message->setPlainTextContent($array[2]);
-        $message->setSender(Sender::fromArray($array[3]));
-        foreach ($array[4] as $recipient) {
-            $message->addRecipient(Recipient::fromArray($recipient));
-        }
-        foreach ($array[5] as $header) {
+        $message->setTemplate($array[1]);
+        $message->setHtmlContent($array[2]);
+        $message->setPlainTextContent($array[3]);
+        $message->setSender(Sender::fromArray($array[4]));
+        $message->setRecipient(Recipient::fromArray($array[5]));
+
+        foreach ($array[6] as $header) {
             $message->addHeader(Header::fromArray($header));
         }
-        foreach ($array[6] as $attachment) {
+        foreach ($array[7] as $attachment) {
             $message->addAttachment(Attachment::fromArray($attachment));
         }
-        $message->setPriority(Priority::fromString($array[7]));
+        foreach ($array[8] as $variable) {
+            $message->addVariable(Variable::fromArray($variable));
+        }
+        $message->setPriority(Priority::fromString($array[9]));
 
         return $message;
     }

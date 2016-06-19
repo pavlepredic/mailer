@@ -5,8 +5,11 @@ namespace HelloFresh\Mailer;
 use HelloFresh\Mailer\Contract\MailerInterface;
 use HelloFresh\Mailer\Contract\MessageInterface;
 use HelloFresh\Mailer\Contract\SerializerInterface;
+use HelloFresh\Mailer\Exception\ResponseException;
+use HelloFresh\Mailer\Exception\SerializationException;
 use HelloFresh\Mailer\Implementation\Common\JsonSerializer;
 use HelloFresh\Reagieren\ConsumerInterface;
+use HelloFresh\Reagieren\Message as EventMessage;
 use HelloFresh\Reagieren\ProducerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -71,6 +74,26 @@ class Service
         $payload = $this->getSerializer()->serialize($message);
         $priority = $message->getPriority()->toString();
         $this->getEventProducer()->produce($priority, $payload);
+    }
+
+    public function listen($priority)
+    {
+        $this->getEventConsumer()->consume($priority, [$this, 'consume']);
+    }
+
+    public function consume(EventMessage $eventMessage)
+    {
+        try {
+            $message = $this->getSerializer()->unserialize($eventMessage->getPayload());
+            $response = $this->getMailer()->send($message);
+            if ($response->isSuccessful()) {
+                //TODO acknowledge message
+            }
+        } catch (SerializationException $se) {
+
+        } catch (ResponseException $re) {
+            //TODO reschedule message
+        }
     }
 
     /**

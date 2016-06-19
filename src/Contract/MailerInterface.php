@@ -2,15 +2,15 @@
 
 namespace HelloFresh\Mailer\Contract;
 
-use HelloFresh\Mailer\Exception\MailerException;
+use HelloFresh\Mailer\Exception\ResponseException;
 
 interface MailerInterface
 {
     /**
      * Sends message
      * @param MessageInterface $message
-     * @throws MailerException
-     * @return void
+     * @throws ResponseException
+     * @return ResponseInterface
      */
     public function send(MessageInterface $message);
 }

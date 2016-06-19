@@ -9,6 +9,7 @@ use HelloFresh\Mailer\Implementation\Common\Message;
 use HelloFresh\Mailer\Implementation\Common\Priority\Priority;
 use HelloFresh\Mailer\Implementation\Common\Recipient;
 use HelloFresh\Mailer\Implementation\Common\Sender;
+use HelloFresh\Mailer\Implementation\Common\Variable;
 
 class Factory
 {
@@ -18,6 +19,14 @@ class Factory
         $header->setName($name);
         $header->setValue($value);
         return $header;
+    }
+
+    public static function createVariable($name = 'variableName', $value = 'variableValue')
+    {
+        $variable = new Variable();
+        $variable->setName($name);
+        $variable->setValue($value);
+        return $variable;
     }
 
     public static function createAttachment($mimeType = 'attachmentType', $name = 'attachmentName', $content = 'attachmentContent')
@@ -48,25 +57,23 @@ class Factory
 
     public static function createMessage(
         $subject = 'messageSubject',
+        $template = 'messageTemplate',
         $htmlContent = 'messageHtmlContent',
         $textContent = 'messageTextContent',
         $priority = 'high_priority',
         Sender $sender = null,
-        array $recipients = [],
+        Recipient $recipient = null,
         array $headers = [],
-        array $attachments = []
+        array $attachments = [],
+        array $variables = []
     ) {
         $message = new Message(Priority::fromString($priority));
         $message->setSubject($subject);
+        $message->setTemplate($template);
         $message->setHtmlContent($htmlContent);
         $message->setPlainTextContent($textContent);
         $message->setSender($sender ? $sender : Factory::createSender());
-        if (!$recipients) {
-            $recipients[] = Factory::createRecipient();
-        }
-        foreach ($recipients as $recipient) {
-            $message->addRecipient($recipient);
-        }
+        $message->setRecipient($recipient ? $recipient : Factory::createRecipient());
         if (!$headers) {
             $headers[] = Factory::createHeader();
         }
@@ -78,6 +85,12 @@ class Factory
         }
         foreach ($attachments as $attachment) {
             $message->addAttachment($attachment);
+        }
+        if (!$variables) {
+            $variables[] = Factory::createVariable();
+        }
+        foreach ($variables as $variable) {
+            $message->addVariable($variable);
         }
 
         return $message;
