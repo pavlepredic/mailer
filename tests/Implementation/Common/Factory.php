@@ -2,6 +2,7 @@
 
 namespace Tests\Implementation\Common;
 
+use HelloFresh\Mailer\Contract\RecipientInterface;
 use HelloFresh\Mailer\Implementation\Common\Attachment;
 use HelloFresh\Mailer\Implementation\Common\Header;
 use HelloFresh\Mailer\Implementation\Common\Message;
@@ -28,11 +29,12 @@ class Factory
         return $attachment;
     }
 
-    public static function createRecipient($name = 'recipientName', $email = 'recipientEmail')
+    public static function createRecipient($name = 'recipientName', $email = 'recipientEmail', $type = RecipientInterface::TYPE_TO)
     {
         $recipient = new Recipient();
         $recipient->setName($name);
         $recipient->setEmail($email);
+        $recipient->setType($type);
         return $recipient;
     }
 
@@ -46,7 +48,8 @@ class Factory
 
     public static function createMessage(
         $subject = 'messageSubject',
-        $content = 'messageContent',
+        $htmlContent = 'messageHtmlContent',
+        $textContent = 'messageTextContent',
         $priority = 'high_priority',
         Sender $sender = null,
         array $recipients = [],
@@ -55,7 +58,8 @@ class Factory
     ) {
         $message = new Message(Priority::fromString($priority));
         $message->setSubject($subject);
-        $message->setContent($content);
+        $message->setHtmlContent($htmlContent);
+        $message->setPlainTextContent($textContent);
         $message->setSender($sender ? $sender : Factory::createSender());
         if (!$recipients) {
             $recipients[] = Factory::createRecipient();

@@ -18,13 +18,24 @@ interface MessageInterface extends ArrayableInterface
     /**
      * @return string
      */
-    public function getContent();
+    public function getHtmlContent();
 
     /**
-     * @param string $content
+     * @param string $htmlContent
      * @return MessageInterface
      */
-    public function setContent($content);
+    public function setHtmlContent($htmlContent);
+
+    /**
+     * @return string
+     */
+    public function getPlainTextContent();
+
+    /**
+     * @param string $plainTextContent
+     * @return MessageInterface
+     */
+    public function setPlainTextContent($plainTextContent);
 
     /**
      * @return SenderInterface
@@ -41,6 +52,12 @@ interface MessageInterface extends ArrayableInterface
      * @return RecipientInterface[]
      */
     public function getRecipients();
+
+    /**
+     * @param string $email
+     * @return RecipientInterface
+     */
+    public function getRecipientByEmail($email);
 
     /**
      * @param RecipientInterface $recipient

@@ -20,9 +20,14 @@ class Message implements MessageInterface
     private $subject;
 
     /**
-     * @var string $content
+     * @var string $htmlContent
      */
-    private $content;
+    private $htmlContent;
+
+    /**
+     * @var string $plainTextContent
+     */
+    private $plainTextContent;
 
     /**
      * @var SenderInterface $sender
@@ -86,17 +91,35 @@ class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
-    public function getContent()
+    public function getHtmlContent()
     {
-        return $this->content;
+        return $this->htmlContent;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setContent($content)
+    public function setHtmlContent($htmlContent)
     {
-        $this->content = $content;
+        $this->htmlContent = $htmlContent;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPlainTextContent()
+    {
+        return $this->plainTextContent;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setPlainTextContent($plainTextContent)
+    {
+        $this->plainTextContent = $plainTextContent;
 
         return $this;
     }
@@ -135,6 +158,18 @@ class Message implements MessageInterface
         $this->getRecipients()->add($recipient);
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRecipientByEmail($email)
+    {
+        foreach ($this->getRecipients() as $recipient) {
+            if ($recipient->getEmail() === $email) {
+                return $recipient;
+            }
+        }
     }
 
     /**
@@ -213,7 +248,8 @@ class Message implements MessageInterface
 
         return [
             $this->getSubject(),
-            $this->getContent(),
+            $this->getHtmlContent(),
+            $this->getPlainTextContent(),
             $this->getSender()->toArray(),
             $recipients,
             $headers,
@@ -230,18 +266,19 @@ class Message implements MessageInterface
         //TODO validate array
         $message = new static;
         $message->setSubject($array[0]);
-        $message->setContent($array[1]);
-        $message->setSender(Sender::fromArray($array[2]));
-        foreach ($array[3] as $recipient) {
+        $message->setHtmlContent($array[1]);
+        $message->setPlainTextContent($array[2]);
+        $message->setSender(Sender::fromArray($array[3]));
+        foreach ($array[4] as $recipient) {
             $message->addRecipient(Recipient::fromArray($recipient));
         }
-        foreach ($array[4] as $header) {
+        foreach ($array[5] as $header) {
             $message->addHeader(Header::fromArray($header));
         }
-        foreach ($array[5] as $attachment) {
+        foreach ($array[6] as $attachment) {
             $message->addAttachment(Attachment::fromArray($attachment));
         }
-        $message->setPriority(Priority::fromString($array[6]));
+        $message->setPriority(Priority::fromString($array[7]));
 
         return $message;
     }

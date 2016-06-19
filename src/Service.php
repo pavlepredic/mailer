@@ -2,13 +2,22 @@
 
 namespace HelloFresh\Mailer;
 
+use HelloFresh\Mailer\Contract\MailerInterface;
 use HelloFresh\Mailer\Contract\MessageInterface;
 use HelloFresh\Mailer\Contract\SerializerInterface;
+use HelloFresh\Mailer\Implementation\Common\JsonSerializer;
 use HelloFresh\Reagieren\ConsumerInterface;
 use HelloFresh\Reagieren\ProducerInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class Service
 {
+    /**
+     * @var MailerInterface $mailer
+     */
+    private $mailer;
+
     /**
      * @var ProducerInterface $eventProducer
      */
@@ -23,6 +32,34 @@ class Service
      * @var SerializerInterface $serializer
      */
     private $serializer;
+
+    /**
+     * @var LoggerInterface $logger
+     */
+    private $logger;
+
+    /**
+     * Service constructor.
+     * @param MailerInterface $mailer
+     * @param ProducerInterface $eventProducer
+     * @param ConsumerInterface $eventConsumer
+     * @param SerializerInterface $serializer
+     * @param LoggerInterface $logger
+     */
+    public function __construct(
+        MailerInterface $mailer,
+        ProducerInterface $eventProducer,
+        ConsumerInterface $eventConsumer,
+        SerializerInterface $serializer = null,
+        LoggerInterface $logger = null
+    ) {
+        $this->mailer = $mailer;
+        $this->eventProducer = $eventProducer;
+        $this->eventConsumer = $eventConsumer;
+        $this->serializer = $serializer ? $serializer : new JsonSerializer();
+        $this->logger = $logger ? $logger : new NullLogger();
+    }
+
 
     /**
      * Adds message to queue
@@ -73,6 +110,24 @@ class Service
     }
 
     /**
+     * @return MailerInterface
+     */
+    public function getMailer()
+    {
+        return $this->mailer;
+    }
+
+    /**
+     * @param MailerInterface $mailer
+     * @return Service
+     */
+    public function setMailer(MailerInterface $mailer)
+    {
+        $this->mailer = $mailer;
+        return $this;
+    }
+
+    /**
      * @return SerializerInterface
      */
     public function getSerializer()
@@ -87,6 +142,24 @@ class Service
     public function setSerializer(SerializerInterface $serializer)
     {
         $this->serializer = $serializer;
+        return $this;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     * @return Service
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
         return $this;
     }
 }
