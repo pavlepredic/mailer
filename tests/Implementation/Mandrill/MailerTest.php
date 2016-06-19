@@ -60,7 +60,7 @@ class MailerTest extends \PHPUnit_Framework_TestCase
             ],
         ];
         $sender
-            ->sendTemplate($message->getTemplate(), $mandrillMessage->getMergeVariables(), $mandrillMessage->toArray())
+            ->sendTemplate($message->getTemplate(), [], $mandrillMessage->toArray())
             ->shouldBeCalled()
             ->willReturn($response)
         ;
@@ -82,7 +82,7 @@ class MailerTest extends \PHPUnit_Framework_TestCase
         $mandrillMessage = new MessageDecorator($message);
         $sender = $this->prophesize('\Mandrill_Messages');
         $sender
-            ->sendTemplate($message->getTemplate(), $mandrillMessage->getMergeVariables(), $mandrillMessage->toArray())
+            ->sendTemplate($message->getTemplate(), [], $mandrillMessage->toArray())
             ->shouldBeCalled()
             ->willThrow(new \Mandrill_Error())
         ;

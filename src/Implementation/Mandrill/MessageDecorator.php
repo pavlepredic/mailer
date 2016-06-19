@@ -47,9 +47,9 @@ class MessageDecorator
         $recipient = $this->getMessage()->getRecipient();
         return [
             [
-            'email' => $recipient->getEmail(),
-            'name' => $recipient->getName(),
-            'type' => $recipient->getType(),
+                'email' => $recipient->getEmail(),
+                'name' => $recipient->getName(),
+                'type' => $recipient->getType(),
             ]
         ];
     }
@@ -98,6 +98,7 @@ class MessageDecorator
             'to' => $this->getRecipients(),
             'headers' => $this->getHeaders(),
             'attachments' => $this->getAttachments(),
+            'global_merge_vars' => $this->getMergeVariables(),
         ];
     }
 

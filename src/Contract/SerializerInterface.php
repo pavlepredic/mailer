@@ -1,6 +1,7 @@
 <?php
 
 namespace HelloFresh\Mailer\Contract;
+
 use HelloFresh\Mailer\Exception\SerializationException;
 
 /**

@@ -25,7 +25,7 @@ class Message implements MessageInterface
     private $template;
 
     /**
-     * @var array $variables
+     * @var Variable[] $variables
      */
     private $variables;
 

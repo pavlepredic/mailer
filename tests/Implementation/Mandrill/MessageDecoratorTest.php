@@ -2,7 +2,6 @@
 
 namespace Tests\Implementation\Mandrill;
 
-use HelloFresh\Mailer\Implementation\Common\Variable;
 use HelloFresh\Mailer\Implementation\Mandrill\MessageDecorator;
 use Tests\Implementation\Common\Factory;
 
@@ -47,18 +46,15 @@ class MessageDecoratorTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertEquals($attachments, $array['attachments']);
-    }
 
-    public function testGetMergeVariables()
-    {
-        $message = Factory::createMessage();
-        $decorator = new MessageDecorator($message);
-        $mergeVariables = $decorator->getMergeVariables();
-        $firstMergeVariable = array_shift($mergeVariables);
+        $mergeVariables = [];
+        foreach ($message->getVariables() as $variable) {
+            $mergeVariables[] = [
+                'name' => $variable->getName(),
+                'content' => $variable->getValue(),
+            ];
+        }
 
-        /** @var Variable $firstVariable */
-        $firstVariable = $message->getVariables()->first();
-        $this->assertEquals($firstVariable->getName(), $firstMergeVariable['name']);
-        $this->assertEquals($firstVariable->getValue(), $firstMergeVariable['content']);
+        $this->assertEquals($mergeVariables, $array['global_merge_vars']);
     }
 }

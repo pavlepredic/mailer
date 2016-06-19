@@ -9,17 +9,17 @@ use HelloFresh\Mailer\Exception\ResponseException;
 class Mailer implements MailerInterface
 {
     /**
-     * @var \Mandrill_Messages $sender
+     * @var \Mandrill_Messages $mandrill
      */
-    private $sender;
+    private $mandrill;
 
     /**
      * Mailer constructor.
-     * @param \Mandrill_Messages $sender
+     * @param \Mandrill_Messages $mandrill
      */
-    public function __construct(\Mandrill_Messages $sender)
+    public function __construct(\Mandrill_Messages $mandrill)
     {
-        $this->sender = $sender;;
+        $this->mandrill = $mandrill;
     }
 
     /**
@@ -30,13 +30,13 @@ class Mailer implements MailerInterface
         $mandrillMessage = new MessageDecorator($message);
         try {
             if ($message->getTemplate()) {
-                $response = $this->getSender()->sendTemplate(
+                $response = $this->getMandrill()->sendTemplate(
                     $message->getTemplate(),
-                    $mandrillMessage->getMergeVariables(),
+                    [],
                     $mandrillMessage->toArray()
                 );
             } else {
-                $response = $this->getSender()->send($mandrillMessage->toArray());
+                $response = $this->getMandrill()->send($mandrillMessage->toArray());
             }
 
             $response = $response[$message->getRecipient()->getEmail()];
@@ -49,8 +49,8 @@ class Mailer implements MailerInterface
     /**
      * @return \Mandrill_Messages
      */
-    protected function getSender()
+    protected function getMandrill()
     {
-        return $this->sender;
+        return $this->mandrill;
     }
 }
