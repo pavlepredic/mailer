@@ -2,32 +2,37 @@
 
 namespace HelloFresh\Mailer;
 
+use HelloFresh\Mailer\Contract\EventConsumerInterface;
+use HelloFresh\Mailer\Contract\EventProducerInterface;
 use HelloFresh\Mailer\Contract\MailerInterface;
 use HelloFresh\Mailer\Contract\MessageInterface;
+use HelloFresh\Mailer\Contract\PriorityInterface;
 use HelloFresh\Mailer\Contract\SerializerInterface;
 use HelloFresh\Mailer\Exception\ResponseException;
 use HelloFresh\Mailer\Exception\SerializationException;
 use HelloFresh\Mailer\Implementation\Common\JsonSerializer;
-use HelloFresh\Reagieren\ConsumerInterface;
-use HelloFresh\Reagieren\Message as EventMessage;
-use HelloFresh\Reagieren\ProducerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class Service
 {
+    const TOPIC_PENDING = 'pending';
+    const TOPIC_SENT = 'sent';
+    const TOPIC_FAILED = 'failed';
+    const TOPIC_EXCEPTION = 'exception';
+
     /**
      * @var MailerInterface $mailer
      */
     private $mailer;
 
     /**
-     * @var ProducerInterface $eventProducer
+     * @var EventProducerInterface $eventProducer
      */
     private $eventProducer;
 
     /**
-     * @var ConsumerInterface $eventConsumer
+     * @var EventConsumerInterface $eventConsumer
      */
     private $eventConsumer;
 
@@ -42,24 +47,32 @@ class Service
     private $logger;
 
     /**
+     * @var string $topicNamespace
+     */
+    private $topicNamespace;
+
+    /**
      * Service constructor.
      * @param MailerInterface $mailer
-     * @param ProducerInterface $eventProducer
-     * @param ConsumerInterface $eventConsumer
+     * @param EventProducerInterface $eventProducer
+     * @param EventConsumerInterface $eventConsumer
      * @param SerializerInterface $serializer
+     * @param string $topicNamespace
      * @param LoggerInterface $logger
      */
     public function __construct(
         MailerInterface $mailer,
-        ProducerInterface $eventProducer,
-        ConsumerInterface $eventConsumer,
+        EventProducerInterface $eventProducer,
+        EventConsumerInterface $eventConsumer,
         SerializerInterface $serializer = null,
+        $topicNamespace = null,
         LoggerInterface $logger = null
     ) {
         $this->mailer = $mailer;
         $this->eventProducer = $eventProducer;
         $this->eventConsumer = $eventConsumer;
         $this->serializer = $serializer ? $serializer : new JsonSerializer();
+        $this->topicNamespace = $topicNamespace;
         $this->logger = $logger ? $logger : new NullLogger();
     }
 
@@ -73,31 +86,37 @@ class Service
     {
         $payload = $this->getSerializer()->serialize($message);
         $priority = $message->getPriority()->toString();
-        $this->getEventProducer()->produce($priority, $payload);
+        $topic = $this->getTopic([self::TOPIC_PENDING, $priority]);
+        $this->getEventProducer()->produce($payload, $topic);
     }
 
-    public function listen($priority)
+    public function listen(PriorityInterface $priority)
     {
-        $this->getEventConsumer()->consume($priority, [$this, 'consume']);
+        $topic = $this->getTopic([self::TOPIC_PENDING, $priority->toString()]);
+        $this->getEventConsumer()->consume([$this, 'consume'], $topic);
     }
 
-    public function consume(EventMessage $eventMessage)
+    public function consume($eventMessage)
     {
         try {
-            $message = $this->getSerializer()->unserialize($eventMessage->getPayload());
+            $message = $this->getSerializer()->unserialize($eventMessage);
             $response = $this->getMailer()->send($message);
             if ($response->isSuccessful()) {
-                //TODO acknowledge message
+                $this->getEventProducer()->produce($eventMessage, $this->getTopic([self::TOPIC_SENT]));
+            } else {
+                $this->getEventProducer()->produce($eventMessage, $this->getTopic([self::TOPIC_FAILED]));
             }
         } catch (SerializationException $se) {
-
+            $this->getEventProducer()->produce($eventMessage, $this->getTopic([self::TOPIC_EXCEPTION]));
         } catch (ResponseException $re) {
-            //TODO reschedule message
+            //TODO re-schedule email
         }
+
+        return true;
     }
 
     /**
-     * @return ProducerInterface
+     * @return EventProducerInterface
      */
     public function getEventProducer()
     {
@@ -105,17 +124,17 @@ class Service
     }
 
     /**
-     * @param ProducerInterface $eventProducer
+     * @param EventProducerInterface $eventProducer
      * @return Service
      */
-    public function setEventProducer(ProducerInterface $eventProducer)
+    public function setEventProducer(EventProducerInterface $eventProducer)
     {
         $this->eventProducer = $eventProducer;
         return $this;
     }
 
     /**
-     * @return ConsumerInterface
+     * @return EventConsumerInterface
      */
     public function getEventConsumer()
     {
@@ -123,10 +142,10 @@ class Service
     }
 
     /**
-     * @param ConsumerInterface $eventConsumer
+     * @param EventConsumerInterface $eventConsumer
      * @return Service
      */
-    public function setEventConsumer(ConsumerInterface $eventConsumer)
+    public function setEventConsumer(EventConsumerInterface $eventConsumer)
     {
         $this->eventConsumer = $eventConsumer;
         return $this;
@@ -184,5 +203,22 @@ class Service
     {
         $this->logger = $logger;
         return $this;
+    }
+
+    /**
+     * @param array|string $topicElements
+     * @return string
+     */
+    public function getTopic($topicElements)
+    {
+        if (!is_array($topicElements)) {
+            $topicElements = [$topicElements];
+        }
+
+        if ($this->topicNamespace) {
+            array_unshift($topicElements, $this->topicNamespace);
+        }
+
+        return join('.', $topicElements);
     }
 }

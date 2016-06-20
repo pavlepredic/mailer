@@ -3,13 +3,19 @@
     "description": "Event-based mailing system",
     "require": {
         "mandrill/mandrill": "~1.0",
-        "hellofresh/reagieren": "~0.6",
+        "hellofresh/rabbit-php": "~3.0",
         "doctrine/common": "^2.6",
         "psr/log": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.4"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:hellofresh/rabbit-php.git"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "HelloFresh\\Mailer\\": "src",

@@ -3,7 +3,11 @@
 namespace Tests;
 
 use HelloFresh\Mailer\Implementation\Common\JsonSerializer;
+use HelloFresh\Mailer\Implementation\Mandrill\Response;
+use HelloFresh\Mailer\Implementation\Queue\EventConsumer;
+use HelloFresh\Mailer\Implementation\Queue\EventProducer;
 use HelloFresh\Mailer\Service;
+use Prophecy\Argument;
 use Tests\Implementation\Common\Factory;
 
 class ServiceTest extends \PHPUnit_Framework_TestCase
@@ -13,15 +17,16 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $message = Factory::createMessage();
         $serializer = new JsonSerializer();
         $mailer = $this->prophesize('HelloFresh\Mailer\Contract\MailerInterface');
-        $producer = $this->prophesize('HelloFresh\Reagieren\ProducerInterface');
-        $producer
-            ->produce($message->getPriority()->toString(), $serializer->serialize($message))
+        $mailer
+            ->send(Argument::type('HelloFresh\Mailer\Implementation\Common\Message'))
             ->shouldBeCalled()
+            ->willReturn(new Response('sent'))
         ;
-        $consumer = $this->prophesize('HelloFresh\Reagieren\ConsumerInterface');
-        $service = new Service($mailer->reveal(), $producer->reveal(), $consumer->reveal());
+        $producer = new EventProducer();
+        $consumer = new EventConsumer();
+        $service = new Service($mailer->reveal(), $producer, $consumer, $serializer);
 
-        $service->setEventProducer($producer->reveal());
         $service->enqueue($message);
+        $service->listen($message->getPriority());
     }
 }
