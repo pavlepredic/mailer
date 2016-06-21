@@ -3,6 +3,8 @@
 namespace HelloFresh\Mailer\Implementation\Common;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use HelloFresh\Mailer\Contract\ArrayableInterface;
 use HelloFresh\Mailer\Contract\AttachmentInterface;
 use HelloFresh\Mailer\Contract\HeaderInterface;
 use HelloFresh\Mailer\Contract\MessageInterface;
@@ -65,6 +67,11 @@ class Message implements MessageInterface
     private $priority;
 
     /**
+     * @var SendAttempt[] $sendAttempts
+     */
+    private $sendAttempts;
+
+    /**
      * Message constructor.
      * @param PriorityInterface $priority
      */
@@ -73,6 +80,7 @@ class Message implements MessageInterface
         $this->headers = new ArrayCollection();
         $this->attachments = new ArrayCollection();
         $this->variables = new ArrayCollection();
+        $this->sendAttempts = new ArrayCollection();
         if (!$priority) {
             $priority = new NormalPriority();
         }
@@ -292,23 +300,52 @@ class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    public function getSendAttempts()
+    {
+        return $this->sendAttempts;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addSendAttempt(SendAttempt $sendAttempts)
+    {
+        $this->sendAttempts->add($sendAttempts);
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clearSendAttempts()
+    {
+        $this->sendAttempts->clear();
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function countSendAttempts()
+    {
+        return $this->sendAttempts->count();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getLastSendAttempt()
+    {
+        return $this->sendAttempts->last();
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
     public function toArray()
     {
-        $variables = [];
-        foreach ($this->getVariables() as $variable) {
-            $variables[] = $variable->toArray();
-        }
-
-        $headers = [];
-        foreach ($this->getHeaders() as $header) {
-            $headers[] = $header->toArray();
-        }
-
-        $attachments = [];
-        foreach ($this->getAttachments() as $attachment) {
-            $attachments[] = $attachment->toArray();
-        }
-
         return [
             $this->getSubject(),
             $this->getTemplate(),
@@ -316,9 +353,10 @@ class Message implements MessageInterface
             $this->getPlainTextContent(),
             $this->getSender()->toArray(),
             $this->getRecipient()->toArray(),
-            $headers,
-            $attachments,
-            $variables,
+            $this->convertCollectionToArray($this->getHeaders()),
+            $this->convertCollectionToArray($this->getAttachments()),
+            $this->convertCollectionToArray($this->getVariables()),
+            $this->convertCollectionToArray($this->getSendAttempts()),
             $this->getPriority()->toString(),
         ];
     }
@@ -346,8 +384,26 @@ class Message implements MessageInterface
         foreach ($array[8] as $variable) {
             $message->addVariable(Variable::fromArray($variable));
         }
-        $message->setPriority(Priority::fromString($array[9]));
+        foreach ($array[9] as $sendAttempt) {
+            $message->addSendAttempt(SendAttempt::fromArray($sendAttempt));
+        }
+        $message->setPriority(Priority::fromString($array[10]));
 
         return $message;
+    }
+
+    /**
+     * Converts a Collection of ArrayableInterface elements to an array
+     * @param Collection $collection
+     * @return array
+     */
+    private function convertCollectionToArray(Collection $collection)
+    {
+        $array = [];
+        /** @var ArrayableInterface $item */
+        foreach ($collection as $item) {
+            $array[] = $item->toArray();
+        }
+        return $array;
     }
 }

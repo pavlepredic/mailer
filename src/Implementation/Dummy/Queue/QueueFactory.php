@@ -1,6 +1,6 @@
 <?php
 
-namespace HelloFresh\Mailer\Implementation\Queue;
+namespace HelloFresh\Mailer\Implementation\Dummy\Queue;
 
 class QueueFactory
 {
@@ -10,6 +10,8 @@ class QueueFactory
     private static $queues;
 
     /**
+     * Returns a queue by the given name
+     * or creates one if it does not exist
      * @param string $name
      * @return \SplQueue
      */

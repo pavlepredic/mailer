@@ -11,16 +11,12 @@ use HelloFresh\Mailer\Contract\SerializerInterface;
 use HelloFresh\Mailer\Exception\ResponseException;
 use HelloFresh\Mailer\Exception\SerializationException;
 use HelloFresh\Mailer\Implementation\Common\JsonSerializer;
+use HelloFresh\Mailer\Implementation\Common\SendAttempt;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class Service
 {
-    const TOPIC_PENDING = 'pending';
-    const TOPIC_SENT = 'sent';
-    const TOPIC_FAILED = 'failed';
-    const TOPIC_EXCEPTION = 'exception';
-
     /**
      * @var MailerInterface $mailer
      */
@@ -47,32 +43,32 @@ class Service
     private $logger;
 
     /**
-     * @var string $topicNamespace
+     * @var Configuration $configuration
      */
-    private $topicNamespace;
+    private $configuration;
 
     /**
      * Service constructor.
      * @param MailerInterface $mailer
      * @param EventProducerInterface $eventProducer
      * @param EventConsumerInterface $eventConsumer
+     * @param Configuration $configuration
      * @param SerializerInterface $serializer
-     * @param string $topicNamespace
      * @param LoggerInterface $logger
      */
     public function __construct(
         MailerInterface $mailer,
         EventProducerInterface $eventProducer,
         EventConsumerInterface $eventConsumer,
+        Configuration $configuration,
         SerializerInterface $serializer = null,
-        $topicNamespace = null,
         LoggerInterface $logger = null
     ) {
         $this->mailer = $mailer;
         $this->eventProducer = $eventProducer;
         $this->eventConsumer = $eventConsumer;
+        $this->configuration = $configuration;
         $this->serializer = $serializer ? $serializer : new JsonSerializer();
-        $this->topicNamespace = $topicNamespace;
         $this->logger = $logger ? $logger : new NullLogger();
     }
 
@@ -84,125 +80,83 @@ class Service
      */
     public function enqueue(MessageInterface $message)
     {
-        $payload = $this->getSerializer()->serialize($message);
+        $payload = $this->serializer->serialize($message);
         $priority = $message->getPriority()->toString();
-        $topic = $this->getTopic([self::TOPIC_PENDING, $priority]);
-        $this->getEventProducer()->produce($payload, $topic);
+        $topic = $this->getTopic([$this->configuration->topicPending, $priority]);
+        $this->logger->debug("Enqueuing message: " . $payload);
+        $this->eventProducer->produce($payload, $topic);
     }
 
     public function listen(PriorityInterface $priority)
     {
-        $topic = $this->getTopic([self::TOPIC_PENDING, $priority->toString()]);
-        $this->getEventConsumer()->consume([$this, 'consume'], $topic);
+        $this->logger->info(sprintf("Listening for %s messages...", $priority->toString()));
+        $topic = $this->getTopic([$this->configuration->topicPending, $priority->toString()]);
+        $this->eventConsumer->consume([$this, 'consume'], $topic);
     }
 
     public function consume($eventMessage)
     {
         try {
-            $message = $this->getSerializer()->unserialize($eventMessage);
-            $response = $this->getMailer()->send($message);
-            if ($response->isSuccessful()) {
-                $this->getEventProducer()->produce($eventMessage, $this->getTopic([self::TOPIC_SENT]));
-            } else {
-                $this->getEventProducer()->produce($eventMessage, $this->getTopic([self::TOPIC_FAILED]));
+            $message = $this->serializer->unserialize($eventMessage);
+            $this->logger->debug('Got message: ' . $eventMessage);
+            $lastAttempt = $message->getLastSendAttempt();
+            if ($lastAttempt) {
+                $this->logger->debug(sprintf(
+                    "I have already tried to send this message before. Last attempt was on %s",
+                    $lastAttempt->getTimestamp()->format('c')
+                ));
+
+                $elapsedWaitTime = $lastAttempt->getElapsedTime();
+                $remainingWaitTime = $this->configuration->resendDelay - $elapsedWaitTime;
+
+                if ($elapsedWaitTime < $this->configuration->resendDelay) {
+                    $this->logger->debug(sprintf(
+                        "I will not yet attempt to re-send it (waiting for %s more seconds to elapse)",
+                        $remainingWaitTime
+                    ));
+                    return false; //we don't acknowledge the message, so it remains in queue
+                }
             }
+
+            $this->logger->debug('Sending...');
+            $response = $this->mailer->send($message);
+            if ($response->isSuccessful()) {
+                if ($this->configuration->triggerSentEvents) {
+                    $this->eventProducer->produce($eventMessage, $this->getTopic([$this->configuration->topicSent]));
+                }
+                $this->logger->info('Sent: ' . $eventMessage);
+            } else {
+                if ($this->configuration->triggerFailedEvents) {
+                    $this->eventProducer->produce($eventMessage, $this->getTopic([$this->configuration->topicFailed]));
+                }
+                $this->logger->error('Failed [recipient denied]: ' . $eventMessage);
+            }
+
+            return true; //we acknowledge the message, so it is taken out of queue
+
         } catch (SerializationException $se) {
-            $this->getEventProducer()->produce($eventMessage, $this->getTopic([self::TOPIC_EXCEPTION]));
+
+            $this->eventProducer->produce($eventMessage, $this->getTopic([$this->configuration->topicException]));
+            $this->logger->error('Exception [serialization exception]: ' . $eventMessage);
+            return true; //we acknowledge the message, so it is taken out of queue
+
         } catch (ResponseException $re) {
-            //TODO re-schedule email
+
+            $this->logger->debug(sprintf('ResponseException: %s', $re->getMessage()));
+            $sendAttempt = new SendAttempt();
+            $sendAttempt->setStatus(SendAttempt::STATUS_ERROR);
+            $sendAttempt->setError($re->getMessage());
+            $message->addSendAttempt($sendAttempt);
+            if ($message->countSendAttempts() < $this->configuration->sendAttempts) {
+                $this->logger->debug('Putting the message back onto queue');
+                $this->enqueue($message);
+            } else {
+                $this->eventProducer->produce($eventMessage, $this->getTopic([$this->configuration->topicException]));
+                $this->logger->error(sprintf("Exception [%s]: %",  $re->getMessage(), $eventMessage));
+            }
+
+            return true; //we acknowledge the message, so it is taken out of queue
         }
-
-        return true;
-    }
-
-    /**
-     * @return EventProducerInterface
-     */
-    public function getEventProducer()
-    {
-        return $this->eventProducer;
-    }
-
-    /**
-     * @param EventProducerInterface $eventProducer
-     * @return Service
-     */
-    public function setEventProducer(EventProducerInterface $eventProducer)
-    {
-        $this->eventProducer = $eventProducer;
-        return $this;
-    }
-
-    /**
-     * @return EventConsumerInterface
-     */
-    public function getEventConsumer()
-    {
-        return $this->eventConsumer;
-    }
-
-    /**
-     * @param EventConsumerInterface $eventConsumer
-     * @return Service
-     */
-    public function setEventConsumer(EventConsumerInterface $eventConsumer)
-    {
-        $this->eventConsumer = $eventConsumer;
-        return $this;
-    }
-
-    /**
-     * @return MailerInterface
-     */
-    public function getMailer()
-    {
-        return $this->mailer;
-    }
-
-    /**
-     * @param MailerInterface $mailer
-     * @return Service
-     */
-    public function setMailer(MailerInterface $mailer)
-    {
-        $this->mailer = $mailer;
-        return $this;
-    }
-
-    /**
-     * @return SerializerInterface
-     */
-    public function getSerializer()
-    {
-        return $this->serializer;
-    }
-
-    /**
-     * @param SerializerInterface $serializer
-     * @return Service
-     */
-    public function setSerializer(SerializerInterface $serializer)
-    {
-        $this->serializer = $serializer;
-        return $this;
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-
-    /**
-     * @param LoggerInterface $logger
-     * @return Service
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-        return $this;
     }
 
     /**
@@ -215,8 +169,8 @@ class Service
             $topicElements = [$topicElements];
         }
 
-        if ($this->topicNamespace) {
-            array_unshift($topicElements, $this->topicNamespace);
+        if ($this->configuration->topicNamespace) {
+            array_unshift($topicElements, $this->configuration->topicNamespace);
         }
 
         return join('.', $topicElements);

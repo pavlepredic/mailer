@@ -1,6 +1,6 @@
 <?php
 
-namespace HelloFresh\Mailer\Implementation\Queue;
+namespace HelloFresh\Mailer\Implementation\Dummy\Queue;
 
 use HelloFresh\Mailer\Contract\EventConsumerInterface;
 
@@ -19,7 +19,10 @@ class EventConsumer implements EventConsumerInterface
         $queue = QueueFactory::make($routingKey);
         while (!$queue->isEmpty()) {
             $message = $queue->dequeue();
-            call_user_func($callback, $message);
+            $response = call_user_func($callback, $message);
+            if (!$response) {
+                $queue->enqueue($message);
+            }
         }
     }
 }

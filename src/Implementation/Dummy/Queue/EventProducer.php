@@ -1,6 +1,6 @@
 <?php
 
-namespace HelloFresh\Mailer\Implementation\Queue;
+namespace HelloFresh\Mailer\Implementation\Dummy\Queue;
 
 use HelloFresh\Mailer\Contract\EventProducerInterface;
 
@@ -20,5 +20,4 @@ class EventProducer implements EventProducerInterface
         $queue->enqueue($message);
         return true;
     }
-
 }

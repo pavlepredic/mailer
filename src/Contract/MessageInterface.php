@@ -2,6 +2,7 @@
 
 namespace HelloFresh\Mailer\Contract;
 
+use HelloFresh\Mailer\Implementation\Common\SendAttempt;
 use HelloFresh\Mailer\Implementation\Common\Variable;
 
 interface MessageInterface extends ArrayableInterface
@@ -132,4 +133,30 @@ interface MessageInterface extends ArrayableInterface
      * @return MessageInterface
      */
     public function setPriority(PriorityInterface $priority);
+
+    /**
+     * @return SendAttempt[]
+     */
+    public function getSendAttempts();
+
+    /**
+     * @param SendAttempt $sendAttempt
+     * @return MessageInterface
+     */
+    public function addSendAttempt(SendAttempt $sendAttempt);
+
+    /**
+     * @return MessageInterface
+     */
+    public function clearSendAttempts();
+
+    /**
+     * @return int
+     */
+    public function countSendAttempts();
+
+    /**
+     * @return SendAttempt
+     */
+    public function getLastSendAttempt();
 }

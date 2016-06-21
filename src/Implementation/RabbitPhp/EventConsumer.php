@@ -76,13 +76,18 @@ class EventConsumer implements EventConsumerInterface
 
     public function consume(callable $callback, $routingKey = null)
     {
-        $exchange = $this->getExchange();
         /** @var AMQPChannel $channel */
-        $channel = $this->getConnection()->channel();
+        $channel = $this->connection->channel();
         $channel->basic_qos(0, $this->prefetchCount, false);
-        $channel->exchange_declare($exchange->getName(), $exchange->getType(), $exchange->getPassive(), $exchange->getDurable(), $exchange->getAutoDelete());
+        $channel->exchange_declare(
+            $this->exchange->getName(),
+            $this->exchange->getType(),
+            $this->exchange->getPassive(),
+            $this->exchange->getDurable(),
+            $this->exchange->getAutoDelete()
+        );
         $channel->queue_declare($this->queueName, false, true, false, false);
-        $channel->queue_bind($this->queueName, $exchange->getName(), $routingKey);
+        $channel->queue_bind($this->queueName, $this->exchange->getName(), $routingKey);
 
         $this->getLogger()->info('Waiting for messages...');
 
@@ -97,62 +102,10 @@ class EventConsumer implements EventConsumerInterface
                 $response = call_user_func($callback, $message->getBody());
                 if ($response) {
                     $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
+                } else {
+                    $message->delivery_info['channel']->basic_nack($message->delivery_info['delivery_tag'], false, true);
                 }
             }
         );
-    }
-
-    /**
-     * @return ExchangeInterface
-     */
-    public function getExchange()
-    {
-        return $this->exchange;
-    }
-
-    /**
-     * @param ExchangeInterface $exchange
-     * @return EventProducer
-     */
-    public function setExchange(ExchangeInterface $exchange)
-    {
-        $this->exchange = $exchange;
-        return $this;
-    }
-
-    /**
-     * @return Connection
-     */
-    public function getConnection()
-    {
-        return $this->connection;
-    }
-
-    /**
-     * @param Connection $connection
-     * @return EventConsumer
-     */
-    public function setConnection(Connection $connection)
-    {
-        $this->connection = $connection;
-        return $this;
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-
-    /**
-     * @param LoggerInterface $logger
-     * @return EventConsumer
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-        return $this;
     }
 }

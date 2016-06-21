@@ -3,11 +3,13 @@
 namespace Tests\Implementation\Common;
 
 use HelloFresh\Mailer\Contract\RecipientInterface;
+use HelloFresh\Mailer\Contract\SendAttemptInterface;
 use HelloFresh\Mailer\Implementation\Common\Attachment;
 use HelloFresh\Mailer\Implementation\Common\Header;
 use HelloFresh\Mailer\Implementation\Common\Message;
 use HelloFresh\Mailer\Implementation\Common\Priority\Priority;
 use HelloFresh\Mailer\Implementation\Common\Recipient;
+use HelloFresh\Mailer\Implementation\Common\SendAttempt;
 use HelloFresh\Mailer\Implementation\Common\Sender;
 use HelloFresh\Mailer\Implementation\Common\Variable;
 
@@ -94,5 +96,18 @@ class Factory
         }
 
         return $message;
+    }
+
+    public static function createSendAttempt($timestamp = null, $status = SendAttemptInterface::STATUS_SENT, $error = null)
+    {
+        if (!$timestamp) {
+            $timestamp = new \DateTime();
+        }
+
+        $attempt = new SendAttempt();
+        $attempt->setTimestamp($timestamp);
+        $attempt->setStatus($status);
+        $attempt->setError($error);
+        return $attempt;
     }
 }
