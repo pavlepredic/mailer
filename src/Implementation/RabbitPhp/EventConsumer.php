@@ -89,7 +89,7 @@ class EventConsumer implements EventConsumerInterface
         $channel->queue_declare($this->queueName, false, true, false, false);
         $channel->queue_bind($this->queueName, $this->exchange->getName(), $routingKey);
 
-        $this->getLogger()->info('Waiting for messages...');
+        $this->logger->info('Waiting for messages...');
 
         $channel->basic_consume(
             $this->queueName,

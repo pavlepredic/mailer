@@ -87,6 +87,11 @@ class Service
         $this->eventProducer->produce($payload, $topic);
     }
 
+    /**
+     * Listens for new messages in the queue and consumes them by providing
+     * self::consume as the callback to the consumer
+     * @param PriorityInterface $priority
+     */
     public function listen(PriorityInterface $priority)
     {
         $this->logger->info(sprintf("Listening for %s messages...", $priority->toString()));
@@ -94,6 +99,16 @@ class Service
         $this->eventConsumer->consume([$this, 'consume'], $topic);
     }
 
+    /**
+     * Unserializes the provided $eventMessage into a Message
+     * and sends it using the Mailer.
+     * Returns true to indicate that the $eventMessage was consumed and can be removed from the queue.
+     * Returns false to indicate that the $eventMessage was not consumed and should be put back onto queue.
+     * This method is not a part of the public interface. It needs to be public because it is provided as
+     * a callback to the EventConsumer
+     * @param string $eventMessage
+     * @return bool
+     */
     public function consume($eventMessage)
     {
         try {

@@ -2,6 +2,8 @@
 
 namespace HelloFresh\Mailer\Contract;
 
+use HelloFresh\Mailer\Exception\InvalidArgumentException;
+
 interface SendAttemptInterface extends ArrayableInterface
 {
     const STATUS_SENT = 'sent';
@@ -33,6 +35,7 @@ interface SendAttemptInterface extends ArrayableInterface
     /**
      * @param string $status
      * @return SendAttemptInterface
+     * @throws InvalidArgumentException
      */
     public function setStatus($status);
 

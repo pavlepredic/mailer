@@ -28,22 +28,4 @@ class EventProducer implements EventProducerInterface
     {
         return $this->exchange->publish($message, $routingKey);
     }
-
-    /**
-     * @return ExchangeInterface
-     */
-    public function getExchange()
-    {
-        return $this->exchange;
-    }
-
-    /**
-     * @param ExchangeInterface $exchange
-     * @return EventProducer
-     */
-    public function setExchange($exchange)
-    {
-        $this->exchange = $exchange;
-        return $this;
-    }
 }

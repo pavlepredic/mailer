@@ -30,13 +30,13 @@ class Mailer implements MailerInterface
         $mandrillMessage = new MessageDecorator($message);
         try {
             if ($message->getTemplate()) {
-                $response = $this->getMandrill()->sendTemplate(
+                $response = $this->mandrill->sendTemplate(
                     $message->getTemplate(),
                     [],
                     $mandrillMessage->toArray()
                 );
             } else {
-                $response = $this->getMandrill()->send($mandrillMessage->toArray());
+                $response = $this->mandrill->send($mandrillMessage->toArray());
             }
 
             $response = $response[$message->getRecipient()->getEmail()];
@@ -44,13 +44,5 @@ class Mailer implements MailerInterface
         } catch (\Mandrill_Error $e) {
             throw new ResponseException("Mandrill API error", null, $e);
         }
-    }
-
-    /**
-     * @return \Mandrill_Messages
-     */
-    protected function getMandrill()
-    {
-        return $this->mandrill;
     }
 }

@@ -21,30 +21,11 @@ class MessageDecorator
     }
 
     /**
-     * @return MessageInterface
-     */
-    public function getMessage()
-    {
-        return $this->message;
-    }
-
-    /**
-     * @param MessageInterface $message
-     * @return MessageDecorator
-     */
-    public function setMessage($message)
-    {
-        $this->message = $message;
-
-        return $this;
-    }
-
-    /**
      * @return array
      */
     protected function getRecipients()
     {
-        $recipient = $this->getMessage()->getRecipient();
+        $recipient = $this->message->getRecipient();
         return [
             [
                 'email' => $recipient->getEmail(),
@@ -60,7 +41,7 @@ class MessageDecorator
     protected function getHeaders()
     {
         $headers = [];
-        foreach ($this->getMessage()->getHeaders() as $header) {
+        foreach ($this->message->getHeaders() as $header) {
             $headers[$header->getName()] = $header->getValue();
         }
 
@@ -73,7 +54,7 @@ class MessageDecorator
     protected function getAttachments()
     {
         $attachments = [];
-        foreach ($this->getMessage()->getAttachments() as $attachment) {
+        foreach ($this->message->getAttachments() as $attachment) {
             $attachments[] = [
                 'type' => $attachment->getMimeType(),
                 'name' => $attachment->getName(),
@@ -90,11 +71,11 @@ class MessageDecorator
     public function toArray()
     {
         return [
-            'html' => $this->getMessage()->getHtmlContent(),
-            'text' => $this->getMessage()->getPlainTextContent(),
-            'subject' => $this->getMessage()->getSubject(),
-            'from_email' => $this->getMessage()->getSender()->getEmail(),
-            'from_name' => $this->getMessage()->getSender()->getName(),
+            'html' => $this->message->getHtmlContent(),
+            'text' => $this->message->getPlainTextContent(),
+            'subject' => $this->message->getSubject(),
+            'from_email' => $this->message->getSender()->getEmail(),
+            'from_name' => $this->message->getSender()->getName(),
             'to' => $this->getRecipients(),
             'headers' => $this->getHeaders(),
             'attachments' => $this->getAttachments(),
