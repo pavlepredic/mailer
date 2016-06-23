@@ -6,6 +6,8 @@ use HelloFresh\Mailer\Contract\VariableInterface;
 
 class Variable implements VariableInterface
 {
+    use ArrayValidatorTrait;
+
     /**
      * @var string $name
      */
@@ -68,10 +70,22 @@ class Variable implements VariableInterface
      */
     public static function fromArray(array $array)
     {
-        //TODO validate array
+        static::validateArray(static::getArrayDefinition(), $array);
+
         $var = new static;
         $var->setName($array[0]);
         $var->setValue($array[1]);
         return $var;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getArrayDefinition()
+    {
+        return [
+            'string',
+            'string',
+        ];
     }
 }

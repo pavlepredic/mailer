@@ -16,6 +16,8 @@ use HelloFresh\Mailer\Implementation\Common\Priority\Priority;
 
 class Message implements MessageInterface
 {
+    use ArrayValidatorTrait;
+
     /**
      * @var string $subject
      */
@@ -366,7 +368,8 @@ class Message implements MessageInterface
      */
     public static function fromArray(array $array)
     {
-        //TODO validate array
+        static::validateArray(static::getArrayDefinition(), $array);
+
         $message = new static;
         $message->setSubject($array[0]);
         $message->setTemplate($array[1]);
@@ -405,5 +408,25 @@ class Message implements MessageInterface
             $array[] = $item->toArray();
         }
         return $array;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getArrayDefinition()
+    {
+        return [
+            'string',
+            'string',
+            'string',
+            'string',
+            'array',
+            'array',
+            'array',
+            'array',
+            'array',
+            'array',
+            'string'
+        ];
     }
 }

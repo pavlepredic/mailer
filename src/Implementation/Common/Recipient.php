@@ -58,4 +58,34 @@ class Recipient extends Participant implements RecipientInterface
             self::TYPE_BCC,
         ];
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toArray()
+    {
+        $array = parent::toArray();
+        $array[] = $this->getType();
+        return $array;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function fromArray(array $array)
+    {
+        $recipient = parent::fromArray($array);
+        $recipient->setType(array_pop($array));
+        return $recipient;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getArrayDefinition()
+    {
+        $definition = parent::getArrayDefinition();
+        $definition[] = 'string';
+        return $definition;
+    }
 }

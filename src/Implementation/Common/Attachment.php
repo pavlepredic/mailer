@@ -6,6 +6,8 @@ use HelloFresh\Mailer\Contract\AttachmentInterface;
 
 class Attachment implements AttachmentInterface
 {
+    use ArrayValidatorTrait;
+
     /**
      * @var string $mimeType
      */
@@ -89,14 +91,28 @@ class Attachment implements AttachmentInterface
 
     /**
      * {@inheritdoc}
+     * @return Attachment
      */
     public static function fromArray(array $array)
     {
-        //TODO validate array
+        static::validateArray(static::getArrayDefinition(), $array);
+
         $attachment = new static;
         $attachment->setMimeType($array[0]);
         $attachment->setName($array[1]);
         $attachment->setContent($array[2]);
         return $attachment;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getArrayDefinition()
+    {
+        return [
+            'string',
+            'string',
+            'string',
+        ];
     }
 }

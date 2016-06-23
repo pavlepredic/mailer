@@ -7,6 +7,8 @@ use HelloFresh\Mailer\Exception\InvalidArgumentException;
 
 class SendAttempt implements SendAttemptInterface
 {
+    use ArrayValidatorTrait;
+
     /**
      * @var \DateTime $timestamp
      */
@@ -119,7 +121,8 @@ class SendAttempt implements SendAttemptInterface
      */
     public static function fromArray(array $array)
     {
-        //TODO validate array
+        static::validateArray(static::getArrayDefinition(), $array);
+
         $attempt = new static;
         $attempt->setTimestamp(new \DateTime($array[0]));
         $attempt->setStatus($array[1]);
@@ -137,6 +140,18 @@ class SendAttempt implements SendAttemptInterface
             self::STATUS_SENT,
             self::STATUS_FAILED,
             self::STATUS_ERROR,
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getArrayDefinition()
+    {
+        return [
+            'string',
+            'string',
+            'string',
         ];
     }
 }

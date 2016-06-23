@@ -6,6 +6,8 @@ use HelloFresh\Mailer\Contract\ParticipantInterface;
 
 class Participant implements ParticipantInterface
 {
+    use ArrayValidatorTrait;
+
     /**
      * @var string $name
      */
@@ -68,10 +70,22 @@ class Participant implements ParticipantInterface
      */
     public static function fromArray(array $array)
     {
-        //TODO validate array
+        static::validateArray(static::getArrayDefinition(), $array);
+
         $participant = new static;
         $participant->setName($array[0]);
         $participant->setEmail($array[1]);
         return $participant;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getArrayDefinition()
+    {
+        return [
+            'string',
+            'string',
+        ];
     }
 }

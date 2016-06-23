@@ -17,4 +17,27 @@ class HeaderTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($clone instanceof Header);
         $this->assertEquals($original, $clone);
     }
+
+    /**
+     * @expectedException HelloFresh\Mailer\Exception\SerializationException
+     * @dataProvider arrayValidationDataProvider
+     * @param int $arrayKey
+     * @param mixed $replacement
+     */
+    public function testArrayValidation($arrayKey, $replacement)
+    {
+        $original = Factory::createHeader();
+        $array = $original->toArray();
+
+        $array[$arrayKey] = $replacement;
+        Header::fromArray($array);
+    }
+
+    public function arrayValidationDataProvider()
+    {
+        return [
+            [0, 1],
+            [1, 1],
+        ];
+    }
 }

@@ -17,4 +17,10 @@ interface ArrayableInterface
      * @throws SerializationException
      */
     public static function fromArray(array $array);
+
+    /**
+     * Returns an array of types the input array should contain
+     * @return array
+     */
+    public static function getArrayDefinition();
 }

@@ -38,4 +38,29 @@ class SendAttemptTest extends \PHPUnit_Framework_TestCase
             ['2016-01-01 10:00:00', '2016-01-01 09:00:00', -3600], //test edge case
         ];
     }
+
+    /**
+     * @expectedException HelloFresh\Mailer\Exception\SerializationException
+     * @dataProvider arrayValidationDataProvider
+     * @param int $arrayKey
+     * @param mixed $replacement
+     * @group test
+     */
+    public function testArrayValidation($arrayKey, $replacement)
+    {
+        $original = Factory::createSendAttempt();
+        $array = $original->toArray();
+
+        $array[$arrayKey] = $replacement;
+        SendAttempt::fromArray($array);
+    }
+
+    public function arrayValidationDataProvider()
+    {
+        return [
+            [0, 1],
+            [1, 1],
+            [2, 1],
+        ];
+    }
 }
