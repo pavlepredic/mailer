@@ -64,7 +64,10 @@ class Attachment implements AttachmentInterface
      */
     public function getContent()
     {
-        return $this->content;
+        if ($this->content === null) {
+            return null;
+        }
+        return base64_decode($this->content);
     }
 
     /**
@@ -72,7 +75,7 @@ class Attachment implements AttachmentInterface
      */
     public function setContent($content)
     {
-        $this->content = $content;
+        $this->content = base64_encode($content);
 
         return $this;
     }

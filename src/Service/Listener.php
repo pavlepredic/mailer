@@ -1,27 +1,22 @@
 <?php
 
-namespace HelloFresh\Mailer;
+namespace HelloFresh\Mailer\Service;
 
 use HelloFresh\Mailer\Contract\EventConsumerInterface;
 use HelloFresh\Mailer\Contract\EventProducerInterface;
 use HelloFresh\Mailer\Contract\MailerInterface;
-use HelloFresh\Mailer\Contract\MessageInterface;
 use HelloFresh\Mailer\Contract\PriorityInterface;
 use HelloFresh\Mailer\Contract\SerializerInterface;
 use HelloFresh\Mailer\Exception\ResponseException;
 use HelloFresh\Mailer\Exception\SerializationException;
+use HelloFresh\Mailer\Helper\TopicGenerator;
 use HelloFresh\Mailer\Implementation\Common\JsonSerializer;
 use HelloFresh\Mailer\Implementation\Common\SendAttempt;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class Service
+class Listener
 {
-    /**
-     * @var MailerInterface $mailer
-     */
-    private $mailer;
-
     /**
      * @var EventProducerInterface $eventProducer
      */
@@ -31,6 +26,16 @@ class Service
      * @var EventConsumerInterface $eventConsumer
      */
     private $eventConsumer;
+
+    /**
+     * @var MailerInterface $mailer
+     */
+    private $mailer;
+
+    /**
+     * @var Configuration $configuration
+     */
+    private $configuration;
 
     /**
      * @var SerializerInterface $serializer
@@ -43,59 +48,70 @@ class Service
     private $logger;
 
     /**
-     * @var Configuration $configuration
+     * @var TopicGenerator $topic
      */
-    private $configuration;
+    private $topicGenerator;
 
     /**
-     * Service constructor.
+     * @var Sender $sender
+     */
+    private $sender;
+
+    /**
+     * Listener constructor.
      * @param MailerInterface $mailer
      * @param EventProducerInterface $eventProducer
      * @param EventConsumerInterface $eventConsumer
      * @param Configuration $configuration
      * @param SerializerInterface $serializer
      * @param LoggerInterface $logger
+     * @param TopicGenerator $topicGenerator
+     * @param Sender $sender
      */
     public function __construct(
         MailerInterface $mailer,
         EventProducerInterface $eventProducer,
         EventConsumerInterface $eventConsumer,
-        Configuration $configuration,
+        Configuration $configuration = null,
         SerializerInterface $serializer = null,
-        LoggerInterface $logger = null
+        LoggerInterface $logger = null,
+        TopicGenerator $topicGenerator = null,
+        Sender $sender = null
     ) {
         $this->mailer = $mailer;
         $this->eventProducer = $eventProducer;
         $this->eventConsumer = $eventConsumer;
-        $this->configuration = $configuration;
+        $this->configuration = $configuration ? $configuration : new Configuration();
         $this->serializer = $serializer ? $serializer : new JsonSerializer();
         $this->logger = $logger ? $logger : new NullLogger();
-    }
-
-
-    /**
-     * Adds message to queue
-     * (sends an event with the message as the payload)
-     * @param MessageInterface $message
-     */
-    public function enqueue(MessageInterface $message)
-    {
-        $payload = $this->serializer->serialize($message);
-        $priority = $message->getPriority()->toString();
-        $topic = $this->getTopic([$this->configuration->topicPending, $priority]);
-        $this->logger->debug("Enqueuing message: " . $payload);
-        $this->eventProducer->produce($payload, $topic);
+        if (!$topicGenerator) {
+            $topicGenerator = new TopicGenerator($this->configuration->topicNamespace);
+        }
+        $this->topicGenerator = $topicGenerator;
+        if (!$sender) {
+            $sender = new Sender(
+                $this->eventProducer,
+                $this->configuration,
+                $this->serializer,
+                $this->logger
+            );
+        }
+        $this->sender = $sender;
     }
 
     /**
      * Listens for new messages in the queue and consumes them by providing
      * self::consume as the callback to the consumer
      * @param PriorityInterface $priority
+     * @return void
      */
     public function listen(PriorityInterface $priority)
     {
         $this->logger->info(sprintf("Listening for %s messages...", $priority->toString()));
-        $topic = $this->getTopic([$this->configuration->topicPending, $priority->toString()]);
+        $topic = $this->topicGenerator->generate([
+            $this->configuration->topicPending,
+            $priority->toString(),
+        ]);
         $this->eventConsumer->consume([$this, 'consume'], $topic);
     }
 
@@ -137,12 +153,22 @@ class Service
             $response = $this->mailer->send($message);
             if ($response->isSuccessful()) {
                 if ($this->configuration->triggerSentEvents) {
-                    $this->eventProducer->produce($eventMessage, $this->getTopic([$this->configuration->topicSent]));
+                    $this->eventProducer->produce(
+                        $eventMessage,
+                        $this->topicGenerator->generate([
+                            $this->configuration->topicSent,
+                        ])
+                    );
                 }
                 $this->logger->info('Sent: ' . $eventMessage);
             } else {
                 if ($this->configuration->triggerFailedEvents) {
-                    $this->eventProducer->produce($eventMessage, $this->getTopic([$this->configuration->topicFailed]));
+                    $this->eventProducer->produce(
+                        $eventMessage,
+                        $this->topicGenerator->generate([
+                            $this->configuration->topicFailed,
+                        ])
+                    );
                 }
                 $this->logger->error('Failed [recipient denied]: ' . $eventMessage);
             }
@@ -151,7 +177,12 @@ class Service
 
         } catch (SerializationException $se) {
 
-            $this->eventProducer->produce($eventMessage, $this->getTopic([$this->configuration->topicException]));
+            $this->eventProducer->produce(
+                $eventMessage,
+                $this->topicGenerator->generate([
+                    $this->configuration->topicException,
+                ])
+            );
             $this->logger->error('Exception [serialization exception]: ' . $eventMessage);
             return true; //we acknowledge the message, so it is taken out of queue
 
@@ -164,30 +195,18 @@ class Service
             $message->addSendAttempt($sendAttempt);
             if ($message->countSendAttempts() < $this->configuration->sendAttempts) {
                 $this->logger->debug('Putting the message back onto queue');
-                $this->enqueue($message);
+                $this->sender->enqueue($message);
             } else {
-                $this->eventProducer->produce($eventMessage, $this->getTopic([$this->configuration->topicException]));
+                $this->eventProducer->produce(
+                    $eventMessage,
+                    $this->topicGenerator->generate([
+                        $this->configuration->topicException,
+                    ])
+                );
                 $this->logger->error(sprintf("Exception [%s]: %",  $re->getMessage(), $eventMessage));
             }
 
             return true; //we acknowledge the message, so it is taken out of queue
         }
-    }
-
-    /**
-     * @param array|string $topicElements
-     * @return string
-     */
-    public function getTopic($topicElements)
-    {
-        if (!is_array($topicElements)) {
-            $topicElements = [$topicElements];
-        }
-
-        if ($this->configuration->topicNamespace) {
-            array_unshift($topicElements, $this->configuration->topicNamespace);
-        }
-
-        return join('.', $topicElements);
     }
 }

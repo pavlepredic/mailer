@@ -1,6 +1,6 @@
 <?php
 
-namespace HelloFresh\Mailer;
+namespace HelloFresh\Mailer\Service;
 
 class Configuration
 {

@@ -23,7 +23,8 @@ class MailerTest extends \PHPUnit_Framework_TestCase
         $mandrillMessage = new MessageDecorator($message);
         $sender = $this->prophesize('\Mandrill_Messages');
         $response = [
-            $message->getRecipient()->getEmail() => [
+            [
+                'email' => $message->getRecipient()->getEmail(),
                 'status' => $responseStatus,
                 'reject_reason' => $responseError,
             ],
@@ -54,7 +55,8 @@ class MailerTest extends \PHPUnit_Framework_TestCase
         $mandrillMessage = new MessageDecorator($message);
         $sender = $this->prophesize('\Mandrill_Messages');
         $response = [
-            $message->getRecipient()->getEmail() => [
+            [
+                'email' => $message->getRecipient()->getEmail(),
                 'status' => $responseStatus,
                 'reject_reason' => $responseError,
             ],

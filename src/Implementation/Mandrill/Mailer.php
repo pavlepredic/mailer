@@ -39,10 +39,30 @@ class Mailer implements MailerInterface
                 $response = $this->mandrill->send($mandrillMessage->toArray());
             }
 
-            $response = $response[$message->getRecipient()->getEmail()];
-            return new Response($response['status'], $response['reject_reason']);
+            return $this->parseResponse($response, $message);
         } catch (\Mandrill_Error $e) {
             throw new ResponseException("Mandrill API error", null, $e);
         }
+    }
+
+    /**
+     * @param array $response
+     * @param MessageInterface $message
+     * @return Response
+     * @throws ResponseException
+     */
+    protected function parseResponse($response, MessageInterface $message)
+    {
+        foreach ($response as $recipientStatus) {
+            if (!isset($recipientStatus['email']) or !isset($recipientStatus['status'])) {
+                continue;
+            }
+
+            if ($recipientStatus['email'] === $message->getRecipient()->getEmail()) {
+                return new Response($recipientStatus['status'], @$recipientStatus['reject_reason']);
+            }
+        }
+
+        throw new ResponseException("Invalid API response: missing recipient email in response");
     }
 }

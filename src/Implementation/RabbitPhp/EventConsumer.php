@@ -107,5 +107,12 @@ class EventConsumer implements EventConsumerInterface
                 }
             }
         );
+
+        while(count($channel->callbacks)) {
+            $channel->wait();
+        }
+
+        $channel->close();
+        $this->connection->getConnection()->close();
     }
 }

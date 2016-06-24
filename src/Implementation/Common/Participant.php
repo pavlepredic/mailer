@@ -19,6 +19,17 @@ class Participant implements ParticipantInterface
     private $email;
 
     /**
+     * Participant constructor.
+     * @param string $name
+     * @param string $email
+     */
+    public function __construct($email = null, $name = null)
+    {
+        $this->name = $name;
+        $this->email = $email;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getName()

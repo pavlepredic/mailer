@@ -80,6 +80,10 @@ abstract class Response implements ResponseInterface
      */
     public function __toString()
     {
-        return sprintf('Status: %s, error: %s', $this->getStatus(), $this->getError());
+        $string = "Status: {$this->getStatus()}";
+        if ($this->getError()) {
+            $string.= "; Error: {$this->getError()}";
+        }
+        return $string;
     }
 }

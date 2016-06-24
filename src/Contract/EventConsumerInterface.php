@@ -7,7 +7,7 @@ interface EventConsumerInterface
     /**
      * @param callable $callback
      * @param string $routingKey
-     * @return bool
+     * @return void
      */
     public function consume(callable $callback, $routingKey = null);
 }

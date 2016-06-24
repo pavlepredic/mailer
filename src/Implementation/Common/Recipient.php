@@ -10,19 +10,7 @@ class Recipient extends Participant implements RecipientInterface
     /**
      * @var string $type
      */
-    private $type;
-
-    /**
-     * Recipient constructor.
-     * @param string $type
-     */
-    public function __construct($type = null)
-    {
-        if (!$type) {
-            $type = self::TYPE_TO;
-        }
-        $this->setType($type);
-    }
+    private $type = self::TYPE_TO;
 
     /**
      * {@inheritdoc}

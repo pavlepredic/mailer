@@ -19,6 +19,18 @@ class Variable implements VariableInterface
     private $value;
 
     /**
+     * Variable constructor.
+     * @param string $name
+     * @param string $value
+     */
+    public function __construct($name = null, $value = null)
+    {
+        $this->name = $name;
+        $this->value = $value;
+    }
+
+
+    /**
      * {@inheritdoc}
      */
     public function getName()
