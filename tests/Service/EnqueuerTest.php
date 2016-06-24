@@ -2,11 +2,11 @@
 
 namespace Tests\Service;
 
-use HelloFresh\Mailer\Service\Sender;
+use HelloFresh\Mailer\Service\Enqueuer;
 use Prophecy\Argument;
 use Tests\Implementation\Common\Factory;
 
-class SenderTest extends \PHPUnit_Framework_TestCase
+class EnqueuerTest extends \PHPUnit_Framework_TestCase
 {
     public function testEnqueue()
     {
@@ -31,8 +31,8 @@ class SenderTest extends \PHPUnit_Framework_TestCase
             ->shouldBeCalled()
             ->willReturn(true);
 
-        $sender = new Sender($producer->reveal(), null, $serializer->reveal(), null, $topicGenerator->reveal());
-        $return = $sender->enqueue($message);
+        $enqueuer = new Enqueuer($producer->reveal(), null, $serializer->reveal(), null, $topicGenerator->reveal());
+        $return = $enqueuer->enqueue($message);
         $this->assertTrue($return);
     }
 }

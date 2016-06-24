@@ -11,7 +11,6 @@ use HelloFresh\Mailer\Implementation\Dummy\Response\Error;
 use HelloFresh\Mailer\Implementation\Dummy\Response\Success;
 use HelloFresh\Mailer\Service\Configuration;
 use HelloFresh\Mailer\Service\Listener;
-use HelloFresh\Mailer\Service\Sender;
 use Prophecy\Argument;
 use Tests\Implementation\Common\Factory;
 
@@ -138,7 +137,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
 
         $topicGenerator = $this->prophesize('HelloFresh\Mailer\Helper\TopicGenerator');
 
-        $sender = $this->prophesize('HelloFresh\Mailer\Service\Sender');
+        $enqueuer = $this->prophesize('HelloFresh\Mailer\Service\Enqueuer');
 
         $serializer = $this->prophesize('HelloFresh\Mailer\Contract\SerializerInterface');
 
@@ -168,7 +167,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
                 ->willThrow($exception)
             ;
 
-            $sender
+            $enqueuer
                 ->enqueue($message)
                 ->shouldBeCalled()
                 ->willReturn(true)
@@ -186,7 +185,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
             $serializer->reveal(),
             null,
             $topicGenerator->reveal(),
-            $sender->reveal()
+            $enqueuer->reveal()
         );
 
         $listener->consume($payload);

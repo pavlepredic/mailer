@@ -10,7 +10,7 @@ use HelloFresh\Mailer\Implementation\Common\JsonSerializer;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class Sender
+class Enqueuer
 {
     /**
      * @var EventProducerInterface $eventProducer
@@ -38,7 +38,7 @@ class Sender
     private $topicGenerator;
 
     /**
-     * Sender constructor.
+     * Enqueuer constructor.
      * @param EventProducerInterface $eventProducer
      * @param Configuration $configuration
      * @param SerializerInterface $serializer

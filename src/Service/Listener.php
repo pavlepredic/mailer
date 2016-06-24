@@ -53,9 +53,9 @@ class Listener
     private $topicGenerator;
 
     /**
-     * @var Sender $sender
+     * @var Enqueuer $enqueuer
      */
-    private $sender;
+    private $enqueuer;
 
     /**
      * Listener constructor.
@@ -66,7 +66,7 @@ class Listener
      * @param SerializerInterface $serializer
      * @param LoggerInterface $logger
      * @param TopicGenerator $topicGenerator
-     * @param Sender $sender
+     * @param Enqueuer $enqueuer
      */
     public function __construct(
         MailerInterface $mailer,
@@ -76,7 +76,7 @@ class Listener
         SerializerInterface $serializer = null,
         LoggerInterface $logger = null,
         TopicGenerator $topicGenerator = null,
-        Sender $sender = null
+        Enqueuer $enqueuer = null
     ) {
         $this->mailer = $mailer;
         $this->eventProducer = $eventProducer;
@@ -88,15 +88,15 @@ class Listener
             $topicGenerator = new TopicGenerator($this->configuration->topicNamespace);
         }
         $this->topicGenerator = $topicGenerator;
-        if (!$sender) {
-            $sender = new Sender(
+        if (!$enqueuer) {
+            $enqueuer = new Enqueuer(
                 $this->eventProducer,
                 $this->configuration,
                 $this->serializer,
                 $this->logger
             );
         }
-        $this->sender = $sender;
+        $this->enqueuer = $enqueuer;
     }
 
     /**
@@ -195,7 +195,7 @@ class Listener
             $message->addSendAttempt($sendAttempt);
             if ($message->countSendAttempts() < $this->configuration->sendAttempts) {
                 $this->logger->debug('Putting the message back onto queue');
-                $this->sender->enqueue($message);
+                $this->enqueuer->enqueue($message);
             } else {
                 $this->eventProducer->produce(
                     $eventMessage,
