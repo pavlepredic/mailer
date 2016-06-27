@@ -22,7 +22,7 @@ $message = new \HelloFresh\Mailer\Implementation\Common\Message();
 $message->setSender(new \HelloFresh\Mailer\Implementation\Common\Sender('no-reply@example.org', 'Sender'));
 $message->setTemplate('mail_template');
 $message->setSubject('Subject');
-$message->setRecipient(new \HelloFresh\Mailer\Implementation\Common\Recipient('pavle.predic@example.org, 'Pavle Predic'));
+$message->setRecipient(new \HelloFresh\Mailer\Implementation\Common\Recipient('pavle.predic@example.org', 'Pavle Predic'));
 $message->addVariable(new \HelloFresh\Mailer\Implementation\Common\Variable('user_name', 'Pavle Predic'));
 ```
 
