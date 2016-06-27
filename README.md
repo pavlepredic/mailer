@@ -1,13 +1,7 @@
-<p align="center">
-  <a href="https://hellofresh.com">
-    <img width="120" src="https://www.hellofresh.de/images/hellofresh/press/HelloFresh_Logo.png">
-  </a>
-</p>
-
-# HelloFresh Mailer
+# Mailer
 
 # Description
-HelloFresh Mailer is an event-based mailing system. It uses message queues to publish and consume email messages. It is not bound to any particular message queue implementation, but currently provides support only for RabbitMQ (by using the hellofresh/rabbit-php package).
+Mailer is an event-based mailing system. It uses message queues to publish and consume email messages. It is not bound to any particular message queue implementation, but currently provides support only for RabbitMQ (by using the hellofresh/rabbit-php package).
 
 # Main components
 
@@ -25,10 +19,10 @@ To use the mailer you need to do two things: 1) set up a daemon script that will
 
 ```php
 $message = new \HelloFresh\Mailer\Implementation\Common\Message();
-$message->setSender(new \HelloFresh\Mailer\Implementation\Common\Sender('no-reply@hellofresh.com', 'HelloFresh'));
+$message->setSender(new \HelloFresh\Mailer\Implementation\Common\Sender('no-reply@example.org', 'Sender'));
 $message->setTemplate('mail_template');
 $message->setSubject('Subject');
-$message->setRecipient(new \HelloFresh\Mailer\Implementation\Common\Recipient('ppr@hellofresh.com', 'Pavle Predic'));
+$message->setRecipient(new \HelloFresh\Mailer\Implementation\Common\Recipient('pavle.predic@example.org, 'Pavle Predic'));
 $message->addVariable(new \HelloFresh\Mailer\Implementation\Common\Variable('user_name', 'Pavle Predic'));
 ```
 
@@ -83,4 +77,4 @@ Mailer assumes some reasonable defaults, but if you want to configure it differe
 
 # Extending
 
-HelloFresh Mailer can be easily extended by creating new implementation of the appropriate interfaces. To implement a different mail sender, simply implement `MailerInterface`. To implement a different message queue, simply implement `EventProducerInterface` and `EventConsumerInterface`.
+Mailer can be easily extended by creating new implementation of the appropriate interfaces. To implement a different mail sender, simply implement `MailerInterface`. To implement a different message queue, simply implement `EventProducerInterface` and `EventConsumerInterface`.
