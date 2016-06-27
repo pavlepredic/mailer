@@ -29,7 +29,7 @@ $message->addVariable(new \HelloFresh\Mailer\Implementation\Common\Variable('use
 **2. Instantiate an implementation of EventProducerInterface**
 
 ```php
-/** @var \HelloFresh\RabbitMQ\Exchange\ExchangeInterface $connection */
+/** @var \HelloFresh\RabbitMQ\Exchange\ExchangeInterface $exchange */
 $exchange = ...
 $producer = new \HelloFresh\Mailer\Implementation\RabbitPhp\EventProducer($exchange);
 ```
@@ -57,7 +57,7 @@ $mailer = new \HelloFresh\Mailer\Implementation\Mandrill\Mailer($mandrillMessage
 ```php
 /** @var \HelloFresh\RabbitMQ\Connection $connection */
 $connection = ...;
-/** @var \HelloFresh\RabbitMQ\Exchange\ExchangeInterface $connection */
+/** @var \HelloFresh\RabbitMQ\Exchange\ExchangeInterface $exchange */
 $exchange = ...
 $producer = new \HelloFresh\Mailer\Implementation\RabbitPhp\EventProducer($exchange);
 $consumer = new \HelloFresh\Mailer\Implementation\RabbitPhp\EventConsumer($exchange, $connection);
