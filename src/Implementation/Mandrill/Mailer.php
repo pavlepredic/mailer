@@ -41,7 +41,7 @@ class Mailer implements MailerInterface
 
             return $this->parseResponse($response, $message);
         } catch (\Mandrill_Error $e) {
-            throw new ResponseException("Mandrill API error", null, $e);
+            throw new ResponseException($e->getMessage(), $e->getCode(), $e);
         }
     }
 

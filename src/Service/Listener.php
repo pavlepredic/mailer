@@ -203,7 +203,7 @@ class Listener
                         $this->configuration->topicException,
                     ])
                 );
-                $this->logger->error(sprintf("Exception [%s]: %",  $re->getMessage(), $eventMessage));
+                $this->logger->error('Failed [response exception]: ' . $eventMessage);
             }
 
             return true; //we acknowledge the message, so it is taken out of queue
